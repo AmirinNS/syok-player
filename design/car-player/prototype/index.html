@@ -1,0 +1,2580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Syok Car Player — In-Car Head Unit Design Prototype</title>
+  <!-- Google Fonts for the 3 Directions -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS RESET & BASE ENVIRONMENT
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: #05070a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px 20px 40px;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       TOP TESTER SWITCHER BAR (Outside the Head Unit)
+       ========================================================================== */
+    .prototype-header {
+      width: 100%;
+      max-width: 1360px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #0f141d;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #ff9f0a, #d97706);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #000;
+    }
+
+    .brand-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #f8fafc;
+    }
+    .brand-text p {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .control-groups {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-group {
+      display: inline-flex;
+      background: #182232;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #26354a;
+      gap: 2px;
+    }
+
+    .pill-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .pill-btn:hover {
+      color: #f8fafc;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .pill-btn.active {
+      background: #3b82f6;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+
+    .pill-btn.active.pill-a {
+      background: #ff9f0a;
+      color: #000000;
+      box-shadow: 0 2px 10px rgba(255, 159, 10, 0.4);
+    }
+    .pill-btn.active.pill-b {
+      background: #00e5ff;
+      color: #000000;
+      box-shadow: 0 2px 10px rgba(0, 229, 255, 0.4);
+    }
+    .pill-btn.active.pill-c {
+      background: #0d9488;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(13, 148, 136, 0.4);
+    }
+
+    .drawer-toggle-btn {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .drawer-toggle-btn:hover {
+      background: #2b394f;
+      border-color: #475569;
+    }
+    .drawer-toggle-btn.active {
+      background: #334155;
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+
+    /* ==========================================================================
+       MAIN WRAPPER & HEAD-UNIT BEZEL FRAME
+       ========================================================================== */
+    .viewport-wrapper {
+      position: relative;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    .bezel-frame {
+      position: relative;
+      background: linear-gradient(145deg, #181c24, #0d1017);
+      border-radius: 20px;
+      padding: 16px 20px 20px;
+      box-shadow: 
+        0 30px 60px -12px rgba(0, 0, 0, 0.8),
+        0 18px 36px -18px rgba(0, 0, 0, 0.9),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.8);
+      border: 2px solid #232b38;
+      transition: all 0.25s ease-out;
+    }
+
+    .bezel-top-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px 10px;
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .bezel-hardware-indicators {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* Head Unit Screen Viewport */
+    .headunit-screen {
+      position: relative;
+      width: 1024px;
+      height: 600px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-base);
+      color: var(--text-high);
+      font-family: var(--font-body);
+      transition: background-color 0.2s, color 0.2s, width 0.2s, height 0.2s;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .headunit-screen.size-720p {
+      width: 1280px;
+      height: 720px;
+    }
+
+    /* ==========================================================================
+       THEME TOKENS: DIRECTION A (Night Drive)
+       ========================================================================== */
+    .headunit-screen[data-direction="a"][data-theme="night"] {
+      --bg-base: #0a0d14;
+      --bg-surface: #121722;
+      --bg-card: #182030;
+      --bg-card-hover: #222d42;
+      --accent: #ff9f0a;
+      --accent-glow: rgba(255, 159, 10, 0.3);
+      --accent-contrast: #000000;
+      --text-high: #ffffff;
+      --text-med: #94a3b8;
+      --text-low: #64748b;
+      --border: #243044;
+      --border-subtle: #1c2637;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --btn-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    }
+    .headunit-screen[data-direction="a"][data-theme="day"] {
+      --bg-base: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-card: #e2e8f0;
+      --bg-card-hover: #cbd5e1;
+      --accent: #d97706;
+      --accent-glow: rgba(217, 119, 6, 0.25);
+      --accent-contrast: #ffffff;
+      --text-high: #0f172a;
+      --text-med: #334155;
+      --text-low: #64748b;
+      --border: #cbd5e1;
+      --border-subtle: #e2e8f0;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --btn-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* ==========================================================================
+       THEME TOKENS: DIRECTION B (Dashboard / Cockpit Instrument Cluster)
+       ========================================================================== */
+    .headunit-screen[data-direction="b"][data-theme="night"] {
+      --bg-base: #0b0f15;
+      --bg-surface: #131a24;
+      --bg-card: #1a2533;
+      --bg-card-hover: #243346;
+      --accent: #00e5ff;
+      --accent-glow: rgba(0, 229, 255, 0.4);
+      --accent-contrast: #000000;
+      --accent-secondary: #ff3b30;
+      --text-high: #f0f6fc;
+      --text-med: #8b949e;
+      --text-low: #586069;
+      --border: #28374a;
+      --border-subtle: #1e2a39;
+      --radius: 6px;
+      --radius-sm: 4px;
+      --font-display: 'Chakra Petch', sans-serif;
+      --font-body: 'Chakra Petch', sans-serif;
+      --font-mono: 'Chakra Petch', monospace;
+      --btn-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.7);
+    }
+    .headunit-screen[data-direction="b"][data-theme="day"] {
+      --bg-base: #e2e8f0;
+      --bg-surface: #f1f5f9;
+      --bg-card: #cbd5e1;
+      --bg-card-hover: #b8c7db;
+      --accent: #0284c7;
+      --accent-glow: rgba(2, 132, 199, 0.25);
+      --accent-contrast: #ffffff;
+      --accent-secondary: #dc2626;
+      --text-high: #0f172a;
+      --text-med: #1e293b;
+      --text-low: #475569;
+      --border: #94a3b8;
+      --border-subtle: #cbd5e1;
+      --radius: 6px;
+      --radius-sm: 4px;
+      --font-display: 'Chakra Petch', sans-serif;
+      --font-body: 'Chakra Petch', sans-serif;
+      --font-mono: 'Chakra Petch', monospace;
+      --btn-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* ==========================================================================
+       THEME TOKENS: DIRECTION C (Kopitiam - Day-First Warm Cream & Teal)
+       ========================================================================== */
+    .headunit-screen[data-direction="c"][data-theme="day"] {
+      --bg-base: #faf5ee;
+      --bg-surface: #ffffff;
+      --bg-card: #f3ece1;
+      --bg-card-hover: #e8ded0;
+      --accent: #0d9488;          /* Warm Tropical Teal */
+      --accent-glow: rgba(13, 148, 136, 0.3);
+      --accent-contrast: #ffffff;
+      --accent-secondary: #d97706;/* Teh Tarik Amber */
+      --text-high: #2a1c15;       /* Dark roast coffee */
+      --text-med: #5e4336;       /* Cocoa */
+      --text-low: #8f6e5e;
+      --border: #decbc0;
+      --border-subtle: #ede1d7;
+      --radius: 24px;
+      --radius-sm: 14px;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --btn-shadow: 0 4px 14px rgba(80,40,20,0.08);
+    }
+    .headunit-screen[data-direction="c"][data-theme="night"] {
+      --bg-base: #17120f;         /* Kopi-o deep black */
+      --bg-surface: #241c17;
+      --bg-card: #342721;
+      --bg-card-hover: #46352c;
+      --accent: #14b8a6;          /* Teal glow */
+      --accent-glow: rgba(20, 184, 166, 0.35);
+      --accent-contrast: #0f172a;
+      --accent-secondary: #f59e0b;
+      --text-high: #fff7ed;       /* Warm cream */
+      --text-med: #d7c4b7;
+      --text-low: #a18a7c;
+      --border: #4d392e;
+      --border-subtle: #3a2b22;
+      --radius: 24px;
+      --radius-sm: 14px;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --btn-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    }
+
+    /* ==========================================================================
+       AUTOMOTIVE SYSTEM BAR (System Time & Playback Status)
+       ========================================================================== */
+    .system-bar {
+      height: 48px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(0,0,0,0.15);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 10;
+    }
+    .system-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+      color: var(--accent);
+    }
+    .app-brand svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+    .vehicle-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-med);
+      background: var(--bg-surface);
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+    }
+    .system-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--text-med);
+      font-size: 13px;
+      font-family: var(--font-mono);
+    }
+    .clock-display {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-high);
+    }
+
+    /* Screen Views Container */
+    .screen-view {
+      flex: 1;
+      display: none;
+      position: relative;
+      overflow: hidden;
+      height: calc(100% - 48px);
+    }
+    .screen-view.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================================
+       NOW PLAYING: DIRECTION A (Night Drive - Split Asymmetric Layout)
+       ========================================================================== */
+    .np-layout-a {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      padding: 20px 24px;
+      gap: 28px;
+    }
+    .np-layout-a .art-col {
+      flex: 0 0 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .headunit-screen.size-720p .np-layout-a .art-col {
+      flex: 0 0 460px;
+    }
+    .np-layout-a .art-card {
+      width: 320px;
+      height: 320px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+      background: var(--bg-card);
+    }
+    .headunit-screen.size-720p .np-layout-a .art-card {
+      width: 400px;
+      height: 400px;
+    }
+    .np-layout-a .art-card svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .np-layout-a .ctrl-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 4px 0;
+      min-width: 0;
+    }
+    .top-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .nav-pill-btn {
+      min-height: 48px;
+      padding: 0 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-high);
+      font-size: 14px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .nav-pill-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Direction A Track Meta */
+    .meta-a .track-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--text-high);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .headunit-screen.size-720p .meta-a .track-title {
+      font-size: 38px;
+    }
+    .meta-a .artist-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-med);
+      margin-top: 4px;
+    }
+    .meta-a .album-sub {
+      font-size: 14px;
+      color: var(--text-low);
+      margin-top: 2px;
+    }
+
+    /* Scrubber A */
+    .scrubber-a {
+      margin-top: 6px;
+    }
+    .progress-box {
+      width: 100%;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .progress-rail {
+      width: 100%;
+      height: 10px;
+      background: var(--bg-card);
+      border-radius: 5px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+    .progress-fill-bar {
+      height: 100%;
+      width: 38%;
+      background: var(--accent);
+      border-radius: 5px;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .time-readout {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-med);
+    }
+
+    /* Buttons A */
+    .btn-row-a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .circ-btn {
+      background: var(--bg-surface);
+      border: 2px solid var(--border);
+      color: var(--text-high);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: transform 0.1s;
+    }
+    .circ-btn:active { transform: scale(0.95); }
+    .circ-btn.sub { width: 56px; height: 56px; border-radius: var(--radius-sm); color: var(--text-med); }
+    .circ-btn.skip { width: 78px; height: 78px; }
+    .circ-btn.skip svg { width: 32px; height: 32px; fill: currentColor; }
+    .circ-btn.play {
+      width: 92px;
+      height: 92px;
+      background: var(--accent);
+      color: var(--accent-contrast);
+      border: 3px solid rgba(255,255,255,0.4);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .circ-btn.play svg { width: 42px; height: 42px; fill: currentColor; }
+
+    /* ==========================================================================
+       NOW PLAYING: DIRECTION B (Dashboard - Instrument Cluster Cockpit)
+       ========================================================================== */
+    .np-layout-b {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      justify-content: space-between;
+      background: radial-gradient(circle at 50% 40%, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    /* Top Telemetry Chips */
+    .dash-top-chips {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 18px;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+    .dash-chip-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .telemetry-chip {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .telemetry-chip.warn {
+      color: #ff3b30;
+      border-color: #ff3b30;
+    }
+
+    /* Center Instrument Cluster Gauge Area */
+    .dash-center-cluster {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 4px 16px;
+    }
+    .dash-meta-header {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .dash-meta-header .title-b {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-high);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .dash-meta-header .artist-b {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+    .dash-meta-header .sub-b {
+      font-size: 12px;
+      color: var(--text-low);
+      font-family: var(--font-mono);
+    }
+
+    /* Circular / Arc Gauge with embedded art */
+    .dash-gauge-wrapper {
+      position: relative;
+      width: 380px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gauge-svg-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .dash-embedded-art {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+      z-index: 2;
+    }
+    .dash-embedded-art svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Left & Right Digital Pods */
+    .gauge-digital-pod {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-align: center;
+      min-width: 90px;
+    }
+    .gauge-digital-pod.left { left: 4px; }
+    .gauge-digital-pod.right { right: 4px; }
+    .gauge-digital-pod .pod-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-low);
+      letter-spacing: 0.05em;
+    }
+    .gauge-digital-pod .pod-val {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    /* Direction B Full-Width Bottom Bar (Thumb-Reachable Deck) */
+    .dash-bottom-dock {
+      height: 86px;
+      min-height: 86px;
+      background: var(--bg-surface);
+      border-top: 2px solid var(--border);
+      display: grid;
+      grid-template-columns: 16% 22% 24% 22% 16%;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.06);
+    }
+    .dock-btn {
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      color: var(--text-high);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      transition: background 0.1s;
+    }
+    .dock-btn:last-child { border-right: none; }
+    .dock-btn:active { background: rgba(0, 229, 255, 0.15); }
+    .dock-btn.primary {
+      background: var(--accent);
+      color: var(--accent-contrast);
+      box-shadow: inset 0 0 16px rgba(0,0,0,0.3);
+    }
+    .dock-btn.primary svg { fill: var(--accent-contrast); }
+    .dock-btn svg { width: 30px; height: 30px; fill: currentColor; }
+    .dock-btn.primary svg { width: 38px; height: 38px; }
+
+    /* ==========================================================================
+       NOW PLAYING: DIRECTION C (Kopitiam - Centered Friendly Stack & Pill Row)
+       ========================================================================== */
+    .np-layout-c {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px 20px;
+      font-family: 'Outfit', sans-serif;
+    }
+    .kopitiam-top-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pill-soft-nav {
+      min-height: 48px;
+      padding: 0 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      color: var(--text-high);
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: var(--btn-shadow);
+    }
+    .pill-soft-nav svg { width: 20px; height: 20px; fill: currentColor; }
+
+    .kopitiam-center-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 600px;
+      margin: auto 0;
+    }
+    .kopitiam-art-card {
+      width: 230px;
+      height: 230px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(100,50,20,0.18), 0 0 0 1px var(--border);
+      margin-bottom: 12px;
+      background: var(--bg-card);
+    }
+    .headunit-screen.size-720p .kopitiam-art-card {
+      width: 290px;
+      height: 290px;
+    }
+    .kopitiam-art-card svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .kopitiam-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-high);
+      line-height: 1.2;
+    }
+    .kopitiam-artist {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 3px;
+    }
+    .kopitiam-sub {
+      font-size: 13px;
+      color: var(--text-low);
+      margin-top: 2px;
+    }
+
+    /* Scrubber C */
+    .kopitiam-scrub-row {
+      width: 100%;
+      max-width: 580px;
+      margin-top: 10px;
+    }
+    .pill-rail {
+      width: 100%;
+      height: 12px;
+      background: var(--bg-card);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+    }
+    .pill-fill {
+      height: 100%;
+      width: 38%;
+      background: var(--accent-secondary);
+      border-radius: 10px;
+    }
+    .pill-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-med);
+      margin-top: 4px;
+      font-family: var(--font-mono);
+    }
+
+    /* Floating Pill Row Controls */
+    .kopitiam-ctrl-row {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      padding: 6px 14px;
+      gap: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      margin-top: 8px;
+    }
+    .pill-btn-c {
+      background: transparent;
+      border: none;
+      color: var(--text-high);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pill-btn-c.sub { width: 52px; height: 52px; color: var(--text-med); }
+    .pill-btn-c.skip { width: 72px; height: 72px; border-radius: 50%; background: var(--bg-card); }
+    .pill-btn-c.skip svg { width: 32px; height: 32px; fill: currentColor; }
+    .pill-btn-c.play {
+      min-width: 96px;
+      height: 76px;
+      padding: 0 24px;
+      border-radius: 40px;
+      background: var(--accent-secondary);
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
+    }
+    .pill-btn-c.play svg { width: 38px; height: 38px; fill: #ffffff; }
+
+    /* ==========================================================================
+       LIBRARY VIEWS (STRUCTURALLY DIFFERENT FOR A, B, AND C)
+       ========================================================================== */
+    .lib-layout {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Direction A Library: Tab Bar + 4-col Cards + Mini Player */
+    .lib-a-header {
+      height: 60px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .lib-a-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      padding: 18px 24px 96px;
+      overflow-y: auto;
+    }
+
+    /* Direction B Library: Dense Automotive Cluster List (76px Touch Rows) */
+    .lib-b-header {
+      height: 52px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      border-bottom: 2px solid var(--border);
+    }
+    .lib-b-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 16px 90px;
+      overflow-y: auto;
+    }
+    .cluster-row-item {
+      min-height: 76px; /* High car tap target */
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: grid;
+      grid-template-columns: 44px 58px 1fr 110px 80px 100px;
+      align-items: center;
+      padding: 0 14px;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .cluster-row-item:hover {
+      background: var(--bg-card);
+      border-color: var(--accent);
+    }
+    .cluster-idx {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .cluster-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .cluster-thumb svg { width: 100%; height: 100%; }
+    .cluster-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-high);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cluster-artist {
+      font-size: 13px;
+      color: var(--text-med);
+      margin-top: 2px;
+    }
+
+    /* Direction C Library: Large Rounded Cards & Big Source Chips */
+    .lib-c-header {
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .lib-c-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px 24px 96px;
+      overflow-y: auto;
+    }
+    .kopitiam-album-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      cursor: pointer;
+      box-shadow: var(--btn-shadow);
+      transition: transform 0.15s;
+    }
+    .kopitiam-album-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+    .kopitiam-album-art {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .kopitiam-album-art svg { width: 100%; height: 100%; }
+
+    /* Persistent Bottom Mini-Player */
+    .bottom-mini-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: var(--bg-surface);
+      border-top: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 5;
+    }
+    .mini-info-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      flex: 1;
+      max-width: 420px;
+    }
+    .mini-art-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .mini-art-thumb svg { width: 100%; height: 100%; }
+    .mini-title-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-high);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mini-sub-text {
+      font-size: 13px;
+      color: var(--text-med);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mini-ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .mini-act-btn {
+      min-width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-high);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .mini-act-btn.play {
+      background: var(--accent);
+      color: var(--accent-contrast);
+      min-width: 66px;
+      height: 66px;
+    }
+    .mini-act-btn svg { width: 28px; height: 28px; fill: currentColor; }
+
+    /* ==========================================================================
+       SCREENS 3, 4, 5 (Queue, Empty/Permission, Error/Offline)
+       ========================================================================== */
+    .queue-box {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 20px 24px;
+    }
+    .queue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .queue-rows-container {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .queue-row {
+      min-height: 72px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      gap: 16px;
+      cursor: pointer;
+    }
+    .queue-row.active {
+      border-left: 6px solid var(--accent);
+      background: var(--bg-card);
+    }
+
+    .empty-state-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      padding: 40px;
+    }
+    .btn-car-big {
+      min-height: 76px;
+      padding: 0 36px;
+      background: var(--accent);
+      color: var(--accent-contrast);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 18px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .error-state-view {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 24px;
+    }
+    .err-banner {
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.15));
+      border: 2px solid #ef4444;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    /* ==========================================================================
+       SIDE PANELS (Decisions Table & Tokens)
+       ========================================================================== */
+    .side-drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 540px;
+      background: #0d121c;
+      border-left: 2px solid #243044;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .side-drawer.open { transform: translateX(0); }
+    .drawer-header {
+      padding: 16px 20px;
+      background: #141c2a;
+      border-bottom: 1px solid #243044;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-header h3 { font-size: 15px; font-weight: 700; color: #f8fafc; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .decisions-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+    .decisions-table th {
+      background: #162030;
+      color: #38bdf8;
+      text-align: left;
+      padding: 10px;
+      font-weight: 700;
+      border-bottom: 1px solid #28374c;
+    }
+    .decisions-table td {
+      padding: 10px;
+      border-bottom: 1px solid #1c2738;
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    /* Toast */
+    .toast-popup {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #0f172a;
+      border: 2px solid var(--accent);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+    .toast-popup.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       TOP PROTOTYPE CONTROL BAR (External Evaluator Harness)
+       ======================================================================== -->
+  <header class="prototype-header">
+    <div class="brand-title">
+      <div class="brand-logo">SY</div>
+      <div class="brand-text">
+        <h1>Syok Car Player — In-Car Prototype</h1>
+        <p>Landscape Android Head Unit (76dp+ Targets • Structurally Distinct Directions)</p>
+      </div>
+    </div>
+
+    <div class="control-groups">
+      <!-- 3 Structurally Distinct Directions Switcher -->
+      <div class="pill-group" title="Select Design Direction">
+        <button class="pill-btn pill-a active" onclick="setDirection('a')">
+          <span>A: Night Drive (Split)</span>
+        </button>
+        <button class="pill-btn pill-b" onclick="setDirection('b')">
+          <span>B: Dashboard (Cluster)</span>
+        </button>
+        <button class="pill-btn pill-c" onclick="setDirection('c')">
+          <span>C: Kopitiam (Day-First)</span>
+        </button>
+      </div>
+
+      <!-- Screen Switcher -->
+      <div class="pill-group" title="Switch Screen">
+        <button class="pill-btn active" id="btn-screen-np" onclick="setScreen('now-playing')">Now Playing</button>
+        <button class="pill-btn" id="btn-screen-lib" onclick="setScreen('library')">Library</button>
+        <button class="pill-btn" id="btn-screen-queue" onclick="setScreen('queue')">Queue</button>
+        <button class="pill-btn" id="btn-screen-empty" onclick="setScreen('empty')">Permission</button>
+        <button class="pill-btn" id="btn-screen-error" onclick="setScreen('error')">Error (Offline)</button>
+      </div>
+
+      <!-- Size Switcher -->
+      <div class="pill-group" title="Screen Resolution">
+        <button class="pill-btn active" id="btn-size-600" onclick="setSize('600')">1024×600 (7")</button>
+        <button class="pill-btn" id="btn-size-720" onclick="setSize('720')">1280×720 (9")</button>
+      </div>
+
+      <!-- Day / Night Toggle -->
+      <div class="pill-group" title="Day / Night Sunlight Mode">
+        <button class="pill-btn active" id="btn-theme-night" onclick="setTheme('night')">🌙 Night</button>
+        <button class="pill-btn" id="btn-theme-day" onclick="setTheme('day')">☀️ Day</button>
+      </div>
+
+      <!-- Panels Toggle -->
+      <button class="drawer-toggle-btn" id="btn-toggle-decisions" onclick="toggleDrawer('decisions')">
+        📋 Decisions Table
+      </button>
+      <button class="drawer-toggle-btn" id="btn-toggle-tokens" onclick="toggleDrawer('tokens')">
+        🎨 Design Tokens
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       HEAD UNIT FRAME & VIEWPORT
+       ======================================================================== -->
+  <main class="viewport-wrapper">
+    <div class="bezel-frame" id="headunit-frame">
+      <div class="bezel-top-status">
+        <div class="bezel-hardware-indicators">
+          <span class="status-led" title="Hardware Active"></span>
+          <span>MALAYSIAN CAR HU &bull; SYOK v1.0</span>
+        </div>
+        <div id="bezel-res-tag">1024 &times; 600 px (Landscape)</div>
+      </div>
+
+      <!-- HEAD UNIT SCREEN CONTAINER -->
+      <div class="headunit-screen" id="headunit-screen" data-direction="a" data-theme="night">
+
+        <!-- Automotive System Bar (Labeled System Time, no weather) -->
+        <div class="system-bar">
+          <div class="system-bar-left">
+            <div class="app-brand">
+              <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+              <span>SYOK</span>
+            </div>
+            <div class="vehicle-status">
+              <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981;"></span>
+              <span id="sys-source-status">STORAGE: LOCAL READY</span>
+            </div>
+          </div>
+          <div class="system-bar-right">
+            <span>MEDIA SESSION: ACTIVE</span>
+            <span class="clock-display" id="live-clock">SYS TIME: 17:40</span>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             SCREEN 1: NOW PLAYING VIEW (Renders A, B, or C dynamically)
+             ==================================================================== -->
+        <section class="screen-view active" id="view-now-playing">
+          <div id="now-playing-content" style="width:100%; height:100%;">
+            <!-- Dynamic structural layout injected based on state.direction -->
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             SCREEN 2: LIBRARY VIEW (Renders A, B, or C dynamically)
+             ==================================================================== -->
+        <section class="screen-view" id="view-library">
+          <div id="library-content" style="width:100%; height:100%;">
+            <!-- Dynamic structural layout injected based on state.direction -->
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             SCREEN 3: QUEUE VIEW
+             ==================================================================== -->
+        <section class="screen-view" id="view-queue">
+          <div class="queue-box">
+            <div class="queue-head">
+              <div>
+                <h2 style="font-size:24px; font-weight:800;">Playback Queue</h2>
+                <p style="font-size:13px; color:var(--text-med);" id="queue-count-sub">8 tracks queued &bull; 34 minutes total</p>
+              </div>
+              <button class="nav-pill-btn" onclick="setScreen('now-playing')">
+                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                <span>Back to Player</span>
+              </button>
+            </div>
+            <div class="queue-rows-container" id="queue-items-container">
+              <!-- Injected via JavaScript -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             SCREEN 4: EMPTY / PERMISSION STATE
+             ==================================================================== -->
+        <section class="screen-view" id="view-empty">
+          <div class="empty-state-view">
+            <div style="width:96px; height:96px; border-radius:50%; background:var(--bg-surface); border:2px dashed var(--accent); display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="var(--accent)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2v-2zm0-10h2v8h-2V7z"/></svg>
+            </div>
+            <h2 style="font-size:26px; font-weight:800; margin-bottom:10px;">Kebenaran Audio Diperlukan</h2>
+            <p style="font-size:15px; color:var(--text-med); max-width:540px; line-height:1.5; margin-bottom:24px;">
+              Syok needs permission to scan audio files on this Android head unit and any plugged-in USB/SD drives.
+              Your private music remains local and is never uploaded.
+            </p>
+            <button class="btn-car-big" onclick="simulatePermissionGrant()">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+              <span>Grant Storage Access (Scan Audio)</span>
+            </button>
+            <p style="font-size:12px; color:var(--text-low); margin-top:20px;">&bull; Driving Safety: Initial scans should be executed while vehicle is safely parked.</p>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             SCREEN 5: ERROR STATE (Server Unreachable / Offline Playback)
+             ==================================================================== -->
+        <section class="screen-view" id="view-error">
+          <div class="error-state-view">
+            <div class="err-banner">
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:44px; height:44px; border-radius:50%; background:rgba(239, 68, 68, 0.25); display:flex; align-items:center; justify-content:center; color:#ef4444;">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M23.64 7c-.45-.34-4.93-4-11.64-4-1.5 0-2.8.2-3.99.57l2.87 2.87C11.51 6.15 11.76 6 12 6c5.29 0 8.97 2.76 9.4 3.1l-9.4 11.72-2.73-3.41-1.42 1.42 3.44 4.3c.38.48 1.05.48 1.43 0l10.92-13.63c.39-.49.39-1.2 0-1.68zM3.27 1.44L1.86 2.85l2.09 2.09C2.28 5.67 1.25 6.44.36 7.15c-.48.38-.48 1.09 0 1.48L11.28 22.25c.38.48 1.05.48 1.43 0l2.33-2.91 6.1 6.1 1.41-1.41L3.27 1.44z"/></svg>
+                </div>
+                <div>
+                  <h3 style="font-size:17px; font-weight:800; color:#f87171;">Navidrome Server Unreachable (my-cloud.home:4533)</h3>
+                  <p style="font-size:13px; color:var(--text-high); margin-top:2px;">Network signal lost in tunnel. Automatically playing 24 downloaded tracks from local offline storage.</p>
+                </div>
+              </div>
+              <button class="nav-pill-btn" style="background:#ef4444; color:#fff; border:none; min-height:48px;" onclick="simulateRetryServer()">
+                <span>Retry Connection</span>
+              </button>
+            </div>
+            <h4 style="font-size:15px; font-weight:700; margin-bottom:10px; color:var(--text-high); display:flex; align-items:center; gap:8px;">
+              <span style="color:#10b981;">&#x2714;</span> Available Offline Downloads (Local Storage)
+            </h4>
+            <div class="queue-rows-container" id="offline-tracks-container">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Feedback Toast -->
+        <div class="toast-popup" id="toast-box">
+          <span id="toast-msg">Track Loaded</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================================
+         SIDE PANEL: DESIGN DECISIONS TABLE
+         ======================================================================== -->
+    <aside class="side-drawer" id="drawer-decisions">
+      <div class="drawer-header">
+        <h3 id="decisions-drawer-title">Design Decisions (Direction A)</h3>
+        <button style="background:transparent; border:none; color:#94a3b8; font-size:18px; cursor:pointer;" onclick="toggleDrawer('decisions')">&#x2715;</button>
+      </div>
+      <div class="drawer-body">
+        <p style="font-size:12px; color:#94a3b8; margin-bottom:14px;" id="decisions-direction-intro">
+          Draft decisions table. All 3 directions differ structurally in layout, thumb targets, and driver glance ergonomics.
+        </p>
+        <table class="decisions-table">
+          <thead>
+            <tr>
+              <th style="width:25%;">Decision</th>
+              <th style="width:38%;">Why (Driving Context &amp; Safety)</th>
+              <th style="width:18%;">Alternative</th>
+              <th style="width:19%;">Trade-off</th>
+            </tr>
+          </thead>
+          <tbody id="decisions-tbody">
+            <!-- Dynamically populated per direction -->
+          </tbody>
+        </table>
+      </div>
+    </aside>
+
+    <!-- ========================================================================
+         SIDE PANEL: DESIGN TOKENS INSPECTOR
+         ======================================================================== -->
+    <aside class="side-drawer" id="drawer-tokens">
+      <div class="drawer-header">
+        <h3 id="tokens-drawer-title">Tokens Inspector</h3>
+        <button style="background:transparent; border:none; color:#94a3b8; font-size:18px; cursor:pointer;" onclick="toggleDrawer('tokens')">&#x2715;</button>
+      </div>
+      <div class="drawer-body" id="tokens-content">
+        <!-- Dynamically rendered based on selected direction and mode -->
+      </div>
+    </aside>
+  </main>
+
+  <!-- ========================================================================
+       JAVASCRIPT: INTERACTION ENGINE & STRUCTURAL LAYOUT BUILDERS
+       ======================================================================== -->
+  <script>
+    /* Original Malaysian-Themed Invented Album Catalog (No real copyright content) */
+    const ALBUMS = [
+      {
+        id: "alb-1",
+        title: "Malam di Bangsar",
+        artist: "The Monsoons",
+        source: "local",
+        tracksCount: 12,
+        format: "FLAC 24-bit/96kHz",
+        year: 2024,
+        artGradient: ["#0f172a", "#1e1b4b", "#4338ca", "#ff9f0a"],
+        artTheme: "city-neon",
+        tracks: [
+          { title: "Jalan Telawi Echoes", duration: 204 },
+          { title: "Midnight Roti Canai", duration: 188 },
+          { title: "Flyover Sprint (Sprint HW)", duration: 242 },
+          { title: "Kedai Kopi Nostalgia", duration: 195 }
+        ]
+      },
+      {
+        id: "alb-9",
+        title: "Jalan Alor Midnight",
+        artist: "KL Jazz Collective",
+        source: "local",
+        tracksCount: 8,
+        format: "FLAC 24-bit/48kHz",
+        year: 2023,
+        artGradient: ["#1e1b4b", "#312e81", "#4f46e5", "#818cf8"],
+        artTheme: "abstract",
+        tracks: [
+          { title: "Saxophone di Petaling", duration: 218 },
+          { title: "Neon Wok Stride", duration: 194 }
+        ]
+      },
+      {
+        id: "alb-2",
+        title: "Kopi O Peng",
+        artist: "Kugiran Senja",
+        source: "usb",
+        tracksCount: 9,
+        format: "MP3 320kbps",
+        year: 2023,
+        artGradient: ["#1c130d", "#382315", "#78350f", "#f59e0b"],
+        artTheme: "kopitiam-glass",
+        tracks: [
+          { title: "Gula Melaka Groove", duration: 255 },
+          { title: "Pagi Ahad Tenang", duration: 210 },
+          { title: "Pasar Seni Sunset", duration: 228 },
+          { title: "Teh Tarik Kurang Manis", duration: 190 }
+        ]
+      },
+      {
+        id: "alb-3",
+        title: "Balik Kampung Beats",
+        artist: "DJ Rimba",
+        source: "navidrome",
+        tracksCount: 14,
+        format: "Opus 256kbps",
+        year: 2024,
+        artGradient: ["#1e1b4b", "#4c0519", "#9f1239", "#fb7185"],
+        artTheme: "dusk-highway",
+        tracks: [
+          { title: "Highway PLUS Jam (Senai)", duration: 208 },
+          { title: "R&R Tapah Midnight Run", duration: 264 },
+          { title: "Hutan Lipur Bassline", duration: 198 },
+          { title: "Toll Booth Synthwave", duration: 176 }
+        ]
+      },
+      {
+        id: "alb-4",
+        title: "Hujan Petang",
+        artist: "Siti & The Skylines",
+        source: "local",
+        tracksCount: 10,
+        format: "FLAC 16-bit/44.1kHz",
+        year: 2022,
+        artGradient: ["#082f49", "#0c4a6e", "#0284c7", "#38bdf8"],
+        artTheme: "rain-windshield",
+        tracks: [
+          { title: "Gerimis di Federal Highway", duration: 290 },
+          { title: "Lampu Merah Damansara", duration: 215 },
+          { title: "Wiper Rhythmic Blues", duration: 230 }
+        ]
+      },
+      {
+        id: "alb-5",
+        title: "Pantai Timur Groove",
+        artist: "Gendang Kota",
+        source: "usb",
+        tracksCount: 8,
+        format: "WAV 24-bit/48kHz",
+        year: 2023,
+        artGradient: ["#022c22", "#064e3b", "#059669", "#34d399"],
+        artTheme: "wau-geometry",
+        tracks: [
+          { title: "Rebana Cyberpunk", duration: 235 },
+          { title: "Angin Laut Cherating", duration: 250 },
+          { title: "Ombak Tujuh", duration: 212 }
+        ]
+      },
+      {
+        id: "alb-6",
+        title: "Lembah Klang Lo-Fi",
+        artist: "Acapella Desa",
+        source: "navidrome",
+        tracksCount: 11,
+        format: "FLAC 24-bit/48kHz",
+        year: 2024,
+        artGradient: ["#2e1065", "#3b0764", "#701a75", "#c026d3"],
+        artTheme: "kl-flyover",
+        tracks: [
+          { title: "Putrajaya Boulevard Cruise", duration: 192 },
+          { title: "LRT Soundscape Petaling", duration: 185 },
+          { title: "Cyberjaya Cyberpunk 2 AM", duration: 218 }
+        ]
+      },
+      {
+        id: "alb-7",
+        title: "Gitar Desa Klasik",
+        artist: "Pak Din Trio",
+        source: "local",
+        tracksCount: 10,
+        format: "MP3 320kbps",
+        year: 2021,
+        artGradient: ["#291807", "#45240c", "#854d0e", "#eab308"],
+        artTheme: "acoustic-wood",
+        tracks: [
+          { title: "Seruling Senja", duration: 304 },
+          { title: "Lagu Buat Peminat", duration: 240 }
+        ]
+      }
+    ];
+
+    /* Radio Stations */
+    const RADIO_STATIONS = [
+      { name: "Radio Klasik Kita", freq: "98.8", unit: "FM", genre: "Evergreen & Acoustic", status: "LIVE 320k" },
+      { name: "Bayu Chillwave", freq: "ONLINE", unit: "AAC", genre: "Lo-Fi Instrumental Beats", status: "ONLINE" },
+      { name: "Rhythm Malaya", freq: "101.5", unit: "FM", genre: "City Pop, Funk & Jazz", status: "LIVE 256k" },
+      { name: "Suara Rimba FM", freq: "92.3", unit: "FM", genre: "Nusantara Ambient Folk", status: "LIVE 192k" }
+    ];
+
+    /* Application Reactive State */
+    let state = {
+      direction: 'a',
+      screen: 'now-playing',
+      theme: 'night',
+      resolution: '600',
+      sourceFilter: 'local',
+      currentAlbumIndex: 0,
+      currentTrackIndex: 0,
+      isPlaying: true,
+      currentTime: 84, // 1:24
+      duration: 204,   // 3:24
+      isShuffle: false,
+      isRepeat: false,
+      playbackTimer: null,
+      permissionGranted: false
+    };
+
+    /* Generate Original SVG Artwork dynamically */
+    function renderSvgArtwork(album, size = 320) {
+      const g = album.artGradient;
+      let visualContent = '';
+
+      if (album.artTheme === 'city-neon') {
+        visualContent = `
+          <rect x="0" y="0" width="${size}" height="${size}" fill="url(#grad-${album.id})"/>
+          <circle cx="${size * 0.75}" cy="${size * 0.3}" r="${size * 0.18}" fill="${g[3]}" opacity="0.8" filter="blur(16px)"/>
+          <path d="M0,${size*0.75} L${size*0.25},${size*0.55} L${size*0.4},${size*0.65} L${size*0.65},${size*0.45} L${size*0.85},${size*0.6} L${size},${size*0.5} L${size},${size} L0,${size} Z" fill="#050811" opacity="0.95"/>
+          <line x1="0" y1="${size*0.82}" x2="${size}" y2="${size*0.82}" stroke="${g[3]}" stroke-width="3" opacity="0.7"/>
+          <text x="${size*0.08}" y="${size*0.25}" font-family="sans-serif" font-weight="800" font-size="${size*0.07}" fill="#ffffff" letter-spacing="2">MALAM DI BANGSAR</text>
+          <text x="${size*0.08}" y="${size*0.33}" font-family="sans-serif" font-weight="600" font-size="${size*0.045}" fill="${g[3]}">THE MONSOONS</text>
+        `;
+      } else if (album.artTheme === 'kopitiam-glass') {
+        visualContent = `
+          <rect x="0" y="0" width="${size}" height="${size}" fill="url(#grad-${album.id})"/>
+          <circle cx="${size*0.5}" cy="${size*0.5}" r="${size*0.35}" fill="rgba(0,0,0,0.3)"/>
+          <rect x="${size*0.3}" y="${size*0.28}" width="${size*0.4}" height="${size*0.44}" rx="${size*0.04}" fill="rgba(245, 158, 11, 0.25)" stroke="#f59e0b" stroke-width="4"/>
+          <rect x="${size*0.3}" y="${size*0.58}" width="${size*0.4}" height="${size*0.14}" rx="${size*0.02}" fill="#fffbeb" opacity="0.85"/>
+          <rect x="${size*0.36}" y="${size*0.35}" width="${size*0.11}" height="${size*0.11}" fill="rgba(255,255,255,0.4)" rx="4"/>
+          <rect x="${size*0.52}" y="${size*0.38}" width="${size*0.12}" height="${size*0.12}" fill="rgba(255,255,255,0.4)" rx="4"/>
+          <text x="${size*0.5}" y="${size*0.84}" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="${size*0.065}" fill="#fff7ed">KOPI O PENG</text>
+          <text x="${size*0.5}" y="${size*0.91}" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="${size*0.045}" fill="#f59e0b">KUGIRAN SENJA</text>
+        `;
+      } else if (album.artTheme === 'dusk-highway') {
+        visualContent = `
+          <rect x="0" y="0" width="${size}" height="${size}" fill="url(#grad-${album.id})"/>
+          <circle cx="${size*0.5}" cy="${size*0.45}" r="${size*0.25}" fill="#fb7185" opacity="0.9"/>
+          <polygon points="${size*0.46},${size*0.6} ${size*0.54},${size*0.6} ${size*0.9},${size} ${size*0.1},${size}" fill="#0f172a"/>
+          <line x1="${size*0.5}" y1="${size*0.62}" x2="${size*0.5}" y2="${size*0.98}" stroke="#facc15" stroke-width="4" stroke-dasharray="10 8"/>
+          <text x="${size*0.08}" y="${size*0.2}" font-family="sans-serif" font-weight="800" font-size="${size*0.06}" fill="#ffffff">BALIK KAMPUNG BEATS</text>
+        `;
+      } else {
+        visualContent = `
+          <rect x="0" y="0" width="${size}" height="${size}" fill="url(#grad-${album.id})"/>
+          <circle cx="${size*0.5}" cy="${size*0.5}" r="${size*0.3}" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="10"/>
+          <circle cx="${size*0.5}" cy="${size*0.5}" r="${size*0.15}" fill="rgba(255,255,255,0.2)"/>
+          <polygon points="${size*0.5},${size*0.22} ${size*0.78},${size*0.72} ${size*0.22},${size*0.72}" fill="none" stroke="${g[3]}" stroke-width="4"/>
+          <text x="${size*0.08}" y="${size*0.88}" font-family="sans-serif" font-weight="800" font-size="${size*0.06}" fill="#ffffff">${album.title.toUpperCase()}</text>
+          <text x="${size*0.08}" y="${size*0.94}" font-family="sans-serif" font-weight="600" font-size="${size*0.04}" fill="${g[3]}">${album.artist.toUpperCase()}</text>
+        `;
+      }
+
+      return `
+        <svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="grad-${album.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${g[0]}" />
+              <stop offset="35%" stop-color="${g[1]}" />
+              <stop offset="70%" stop-color="${g[2]}" />
+              <stop offset="100%" stop-color="${g[3]}" />
+            </linearGradient>
+          </defs>
+          ${visualContent}
+        </svg>
+      `;
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    /* ========================================================================
+       RENDER NOW PLAYING (STRUCTURALLY DISTINCT PER DIRECTION)
+       ======================================================================== */
+    function renderNowPlaying() {
+      const container = document.getElementById('now-playing-content');
+      if (!container) return;
+
+      const currentAlb = ALBUMS[state.currentAlbumIndex];
+      const currentTrk = currentAlb.tracks[state.currentTrackIndex];
+      state.duration = currentTrk.duration;
+      const pct = (state.currentTime / state.duration) * 100;
+      const playIcon = state.isPlaying
+        ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+        : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+
+      if (state.direction === 'a') {
+        /* DIRECTION A: ASYMMETRIC SPLIT LAYOUT (Artwork left, controls right) */
+        container.innerHTML = `
+          <div class="np-layout-a">
+            <div class="art-col">
+              <div class="art-card">
+                ${renderSvgArtwork(currentAlb, 380)}
+                <div style="position:absolute; top:12px; left:12px; background:rgba(0,0,0,0.7); color:#fff; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; font-family:var(--font-mono);">${currentAlb.source.toUpperCase()} SOURCE</div>
+                <div style="position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.7); color:var(--accent); padding:4px 8px; border-radius:4px; font-size:10px; font-weight:700; font-family:var(--font-mono);">${currentAlb.format}</div>
+              </div>
+            </div>
+            <div class="ctrl-col">
+              <div class="top-action-bar">
+                <button class="nav-pill-btn" onclick="setScreen('library')">
+                  <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                  <span>Library</span>
+                </button>
+                <button class="nav-pill-btn" onclick="setScreen('queue')">
+                  <svg viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></svg>
+                  <span>Queue (${ALBUMS.length * 3})</span>
+                </button>
+              </div>
+
+              <div class="meta-a">
+                <div class="track-title">${currentTrk.title}</div>
+                <div class="artist-name">${currentAlb.artist}</div>
+                <div class="album-sub">${currentAlb.title} &bull; Track ${state.currentTrackIndex + 1} of ${currentAlb.tracks.length}</div>
+              </div>
+
+              <div class="scrubber-a">
+                <div class="progress-box" onclick="handleSeek(event)">
+                  <div class="progress-rail">
+                    <div class="progress-fill-bar" style="width:${pct}%;"></div>
+                  </div>
+                </div>
+                <div class="time-readout">
+                  <span>${formatTime(state.currentTime)}</span>
+                  <span>-${formatTime(state.duration - state.currentTime)}</span>
+                </div>
+              </div>
+
+              <div class="btn-row-a">
+                <button class="circ-btn sub" onclick="toggleShuffle()"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+                <button class="circ-btn skip" onclick="prevTrack()"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                <button class="circ-btn play" onclick="togglePlay()">${playIcon}</button>
+                <button class="circ-btn skip" onclick="nextTrack()"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+                <button class="circ-btn sub" onclick="toggleRepeat()"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg></button>
+              </div>
+
+              <div style="background:var(--bg-surface); padding:8px 14px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; font-size:13px; color:var(--text-med); cursor:pointer;" onclick="nextTrack()">
+                <div>UP NEXT: <strong>${currentAlb.tracks[(state.currentTrackIndex+1)%currentAlb.tracks.length].title}</strong></div>
+                <div style="color:var(--accent);">TAP TO SKIP &rarr;</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (state.direction === 'b') {
+        /* DIRECTION B: COCKPIT INSTRUMENT CLUSTER (Arc gauge center, text above, full-width bottom bar) */
+        // Calculate arc stroke offset for SVG gauge
+        // Arc radius = 85, angle span = 240 degrees (from 150deg to 390deg)
+        const arcRadius = 88;
+        const arcCircumference = 2 * Math.PI * arcRadius * (240 / 360); // approx 368
+        const arcOffset = arcCircumference - (pct / 100) * arcCircumference;
+
+        container.innerHTML = `
+          <div class="np-layout-b">
+            <!-- Top Status Telemetry Bar -->
+            <div class="dash-top-chips">
+              <div class="dash-chip-group">
+                <span class="telemetry-chip">&bull; SRC: ${currentAlb.source.toUpperCase()}</span>
+                <span class="telemetry-chip">&bull; ${currentAlb.format}</span>
+                <span class="telemetry-chip">&bull; EXOPLAYER: BUFFER 100%</span>
+                <span class="telemetry-chip">&bull; TRK ${state.currentTrackIndex + 1}/${currentAlb.tracks.length}</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="nav-pill-btn" style="min-height:36px; padding:0 12px; font-size:12px;" onclick="setScreen('library')">&equiv; LIBRARY</button>
+                <button class="nav-pill-btn" style="min-height:36px; padding:0 12px; font-size:12px;" onclick="setScreen('queue')">&equiv; QUEUE (${ALBUMS.length * 3})</button>
+              </div>
+            </div>
+
+            <!-- Center Cockpit Gauge Area -->
+            <div class="dash-center-cluster">
+              <div class="dash-meta-header">
+                <div class="dash-meta-header title-b">${currentTrk.title}</div>
+                <div class="dash-meta-header artist-b">${currentAlb.artist}</div>
+                <div class="dash-meta-header sub-b">${currentAlb.title} &bull; TRACK 0${state.currentTrackIndex + 1}</div>
+              </div>
+
+              <!-- Arc Gauge around artwork -->
+              <div class="dash-gauge-wrapper">
+                <svg class="gauge-svg-canvas" viewBox="0 0 380 200">
+                  <!-- Dial Graduations / Ticks -->
+                  <circle cx="190" cy="110" r="88" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="12" stroke-dasharray="368" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(150 190 110)"/>
+                  <!-- Active Arc Fill -->
+                  <circle cx="190" cy="110" r="88" fill="none" stroke="var(--accent)" stroke-width="12" stroke-dasharray="368" stroke-dashoffset="${arcOffset}" stroke-linecap="round" transform="rotate(150 190 110)" style="filter: drop-shadow(0 0 6px var(--accent)); transition: stroke-dashoffset 0.15s;"/>
+                  <!-- Gauge Labels -->
+                  <text x="110" y="195" font-family="Chakra Petch" font-size="11" font-weight="700" fill="var(--text-low)">0%</text>
+                  <text x="180" y="16" font-family="Chakra Petch" font-size="11" font-weight="700" fill="var(--accent)">PROGRESS</text>
+                  <text x="256" y="195" font-family="Chakra Petch" font-size="11" font-weight="700" fill="var(--text-low)">100%</text>
+                </svg>
+
+                <div class="dash-embedded-art">
+                  ${renderSvgArtwork(currentAlb, 200)}
+                </div>
+
+                <!-- Left Pod: Elapsed -->
+                <div class="gauge-digital-pod left">
+                  <div class="pod-label">ELAPSED</div>
+                  <div class="pod-val">${formatTime(state.currentTime)}</div>
+                </div>
+
+                <!-- Right Pod: Remaining -->
+                <div class="gauge-digital-pod right">
+                  <div class="pod-label">REMAINING</div>
+                  <div class="pod-val">-${formatTime(state.duration - state.currentTime)}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Full-Width Driver Deck (Thumb-reachable huge targets) -->
+            <div class="dash-bottom-dock">
+              <button class="dock-btn" onclick="toggleShuffle()">
+                <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                <span>SHUFFLE</span>
+              </button>
+              <button class="dock-btn" onclick="prevTrack()">
+                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                <span>PREV TRACK</span>
+              </button>
+              <button class="dock-btn primary" onclick="togglePlay()">
+                ${playIcon}
+                <span>${state.isPlaying ? 'PAUSE' : 'PLAY'}</span>
+              </button>
+              <button class="dock-btn" onclick="nextTrack()">
+                <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                <span>NEXT TRACK</span>
+              </button>
+              <button class="dock-btn" onclick="toggleRepeat()">
+                <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+                <span>REPEAT</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (state.direction === 'c') {
+        /* DIRECTION C: KOPITIAM (Day-first light, centered stacked pebble art, pill controls) */
+        container.innerHTML = `
+          <div class="np-layout-c">
+            <!-- Top Soft Pill Navigation -->
+            <div class="kopitiam-top-row">
+              <button class="pill-soft-nav" onclick="setScreen('library')">
+                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                <span>Koleksi Lagu &bull; Library</span>
+              </button>
+              <div style="font-size:13px; font-weight:700; color:var(--text-med); background:var(--bg-surface); padding:8px 16px; border-radius:20px; border:1px solid var(--border);">
+                ${currentAlb.source.toUpperCase()} &bull; ${currentAlb.format}
+              </div>
+              <button class="pill-soft-nav" onclick="setScreen('queue')">
+                <svg viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></svg>
+                <span>Senarai (${ALBUMS.length * 3})</span>
+              </button>
+            </div>
+
+            <!-- Centered Stack Body -->
+            <div class="kopitiam-center-body">
+              <div class="kopitiam-art-card">
+                ${renderSvgArtwork(currentAlb, 300)}
+              </div>
+              <div class="kopitiam-title">${currentTrk.title}</div>
+              <div class="kopitiam-artist">${currentAlb.artist}</div>
+              <div class="kopitiam-sub">${currentAlb.title} &bull; Lagu 0${state.currentTrackIndex + 1}</div>
+
+              <!-- Pill Scrubber -->
+              <div class="kopitiam-scrub-row">
+                <div class="pill-rail" onclick="handleSeek(event)">
+                  <div class="pill-fill" style="width:${pct}%;"></div>
+                </div>
+                <div class="pill-times">
+                  <span>${formatTime(state.currentTime)}</span>
+                  <span>-${formatTime(state.duration - state.currentTime)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Pill Control Bar -->
+            <div class="kopitiam-ctrl-row">
+              <button class="pill-btn-c sub" onclick="toggleShuffle()"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+              <button class="pill-btn-c skip" onclick="prevTrack()"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+              <button class="pill-btn-c play" onclick="togglePlay()">${playIcon}</button>
+              <button class="pill-btn-c skip" onclick="nextTrack()"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+              <button class="pill-btn-c sub" onclick="toggleRepeat()"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg></button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* ========================================================================
+       RENDER LIBRARY (STRUCTURALLY DISTINCT PER DIRECTION)
+       ======================================================================== */
+    function renderLibraryScreen() {
+      const container = document.getElementById('library-content');
+      if (!container) return;
+
+      const currentAlb = ALBUMS[state.currentAlbumIndex];
+      const currentTrk = currentAlb.tracks[state.currentTrackIndex];
+      const filtered = ALBUMS.filter(a => a.source === state.sourceFilter || state.sourceFilter === 'all');
+      const playIcon = state.isPlaying
+        ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+        : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+
+      if (state.direction === 'a') {
+        /* DIRECTION A: 4-COLUMN ALBUM GRID + PERSISTENT MINI PLAYER */
+        container.innerHTML = `
+          <div class="lib-layout">
+            <div class="lib-a-header">
+              <div style="display:flex; gap:10px;">
+                <button class="nav-pill-btn ${state.sourceFilter==='local'?'active':''}" style="${state.sourceFilter==='local'?'background:var(--accent); color:#000;':''}" onclick="setLibSource('local')">Local Files (84)</button>
+                <button class="nav-pill-btn ${state.sourceFilter==='usb'?'active':''}" style="${state.sourceFilter==='usb'?'background:var(--accent); color:#000;':''}" onclick="setLibSource('usb')">USB Drive (120)</button>
+                <button class="nav-pill-btn ${state.sourceFilter==='radio'?'active':''}" style="${state.sourceFilter==='radio'?'background:var(--accent); color:#000;':''}" onclick="setLibSource('radio')">Live Radio (8)</button>
+                <button class="nav-pill-btn ${state.sourceFilter==='navidrome'?'active':''}" style="${state.sourceFilter==='navidrome'?'background:var(--accent); color:#000;':''}" onclick="setLibSource('navidrome')">Navidrome Server</button>
+              </div>
+              <button class="nav-pill-btn" onclick="setScreen('now-playing')">Now Playing &rarr;</button>
+            </div>
+
+            <div class="lib-a-grid">
+              ${filtered.map(a => `
+                <div class="album-card" style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px; cursor:pointer;" onclick="playSelectedAlbum('${a.id}')">
+                  <div style="width:100%; aspect-ratio:1/1; border-radius:var(--radius-sm); overflow:hidden; margin-bottom:8px;">${renderSvgArtwork(a, 200)}</div>
+                  <div style="font-size:16px; font-weight:700; color:var(--text-high); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.title}</div>
+                  <div style="font-size:13px; color:var(--text-med); margin-top:2px;">${a.artist}</div>
+                  <div style="font-size:11px; color:var(--text-low); font-family:var(--font-mono); margin-top:6px; display:flex; justify-content:space-between;">
+                    <span>${a.tracksCount} TRACKS</span>
+                    <span>${a.format.split(' ')[0]}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Mini Player A -->
+            <div class="bottom-mini-bar">
+              <div class="mini-info-box" onclick="setScreen('now-playing')">
+                <div class="mini-art-thumb">${renderSvgArtwork(currentAlb, 64)}</div>
+                <div>
+                  <div class="mini-title-text">${currentTrk.title}</div>
+                  <div class="mini-sub-text">${currentAlb.artist} &bull; ${currentAlb.title}</div>
+                </div>
+              </div>
+              <div class="mini-ctrl-group">
+                <button class="mini-act-btn" onclick="prevTrack()"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                <button class="mini-act-btn play" onclick="togglePlay()">${playIcon}</button>
+                <button class="mini-act-btn" onclick="nextTrack()"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+                <button class="nav-pill-btn" onclick="setScreen('now-playing')">EXPAND</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (state.direction === 'b') {
+        /* DIRECTION B: DENSE AUTOMOTIVE CLUSTER LIST (76px High Touch Targets) */
+        container.innerHTML = `
+          <div class="lib-layout" style="font-family:'Chakra Petch', sans-serif;">
+            <div class="lib-b-header">
+              <div style="display:flex; gap:8px;">
+                <span class="telemetry-chip ${state.sourceFilter==='local'?'warn':''}" style="cursor:pointer;" onclick="setLibSource('local')">[1] LOCAL STORAGE (84)</span>
+                <span class="telemetry-chip ${state.sourceFilter==='usb'?'warn':''}" style="cursor:pointer;" onclick="setLibSource('usb')">[2] USB MASS STORAGE (120)</span>
+                <span class="telemetry-chip ${state.sourceFilter==='radio'?'warn':''}" style="cursor:pointer;" onclick="setLibSource('radio')">[3] RADIO FM TUNER (8)</span>
+                <span class="telemetry-chip ${state.sourceFilter==='navidrome'?'warn':''}" style="cursor:pointer;" onclick="setLibSource('navidrome')">[4] NAVIDROME CLOUD</span>
+              </div>
+              <button class="nav-pill-btn" style="min-height:36px; padding:0 12px; font-size:12px;" onclick="setScreen('now-playing')">&equiv; NOW PLAYING</button>
+            </div>
+
+            <!-- Dense List with 76px Row Targets -->
+            <div class="lib-b-list">
+              ${filtered.map((a, i) => `
+                <div class="cluster-row-item" onclick="playSelectedAlbum('${a.id}')">
+                  <div class="cluster-idx">#0${i+1}</div>
+                  <div class="cluster-thumb">${renderSvgArtwork(a, 64)}</div>
+                  <div style="min-width:0;">
+                    <div class="cluster-title">${a.title}</div>
+                    <div class="cluster-artist">${a.artist} &bull; ${a.tracksCount} TRACKS</div>
+                  </div>
+                  <div class="telemetry-chip">${a.format.split(' ')[0]}</div>
+                  <div style="font-size:13px; font-family:var(--font-mono); color:var(--text-med);">${a.year}</div>
+                  <button class="nav-pill-btn" style="min-height:44px; padding:0 14px; font-size:12px; background:var(--accent); color:#000; border:none; justify-content:center;">&bull; PLAY</button>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Mini Player B (Telemetry Dock) -->
+            <div class="bottom-mini-bar" style="height:76px; border-top:2px solid var(--accent);">
+              <div class="mini-info-box" onclick="setScreen('now-playing')">
+                <div class="mini-art-thumb" style="border-radius:4px; border-color:var(--accent);">${renderSvgArtwork(currentAlb, 64)}</div>
+                <div>
+                  <div class="mini-title-text" style="color:var(--accent);">${currentTrk.title}</div>
+                  <div class="mini-sub-text">${currentAlb.artist} &bull; ${formatTime(state.currentTime)} / ${formatTime(state.duration)}</div>
+                </div>
+              </div>
+              <div class="mini-ctrl-group">
+                <button class="mini-act-btn" style="border-radius:4px;" onclick="prevTrack()"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                <button class="mini-act-btn play" style="border-radius:4px;" onclick="togglePlay()">${playIcon}</button>
+                <button class="mini-act-btn" style="border-radius:4px;" onclick="nextTrack()"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (state.direction === 'c') {
+        /* DIRECTION C: LARGE ROUNDED CARDS & BIG CHIPS */
+        container.innerHTML = `
+          <div class="lib-layout" style="font-family:'Outfit', sans-serif;">
+            <div class="lib-c-header">
+              <div style="display:flex; gap:12px; overflow-x:auto;">
+                <button class="pill-soft-nav" style="${state.sourceFilter==='local'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('local')">🏠 Lagu Tempatan (84)</button>
+                <button class="pill-soft-nav" style="${state.sourceFilter==='usb'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('usb')">💾 Pemacu USB (120)</button>
+                <button class="pill-soft-nav" style="${state.sourceFilter==='radio'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('radio')">📻 Radio Klasik (8)</button>
+                <button class="pill-soft-nav" style="${state.sourceFilter==='navidrome'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('navidrome')">☁️ Navidrome Awan</button>
+              </div>
+              <button class="pill-soft-nav" onclick="setScreen('now-playing')">Sedang Dimainkan &rarr;</button>
+            </div>
+
+            <div class="lib-c-grid">
+              ${filtered.map(a => `
+                <div class="kopitiam-album-card" onclick="playSelectedAlbum('${a.id}')">
+                  <div class="kopitiam-album-art">${renderSvgArtwork(a, 260)}</div>
+                  <div style="font-size:18px; font-weight:800; color:var(--text-high);">${a.title}</div>
+                  <div style="font-size:15px; font-weight:600; color:var(--accent); margin-top:2px;">${a.artist}</div>
+                  <div style="font-size:13px; color:var(--text-low); margin-top:6px; display:flex; justify-content:space-between;">
+                    <span>${a.tracksCount} buah lagu</span>
+                    <span>${a.format.split(' ')[0]}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Mini Player C -->
+            <div class="bottom-mini-bar" style="border-radius:30px 30px 0 0; box-shadow:0 -6px 20px rgba(0,0,0,0.08);">
+              <div class="mini-info-box" onclick="setScreen('now-playing')">
+                <div class="mini-art-thumb" style="border-radius:14px;">${renderSvgArtwork(currentAlb, 64)}</div>
+                <div>
+                  <div class="mini-title-text" style="font-size:16px;">${currentTrk.title}</div>
+                  <div class="mini-sub-text">${currentAlb.artist} &bull; ${currentAlb.title}</div>
+                </div>
+              </div>
+              <div class="mini-ctrl-group">
+                <button class="mini-act-btn" style="border-radius:20px;" onclick="prevTrack()"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                <button class="mini-act-btn play" style="border-radius:24px; min-width:72px;" onclick="togglePlay()">${playIcon}</button>
+                <button class="mini-act-btn" style="border-radius:20px;" onclick="nextTrack()"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function setLibSource(src) {
+      state.sourceFilter = src;
+      renderLibraryScreen();
+    }
+
+    function playSelectedAlbum(albumId) {
+      const idx = ALBUMS.findIndex(a => a.id === albumId);
+      if (idx !== -1) {
+        state.currentAlbumIndex = idx;
+        state.currentTrackIndex = 0;
+        state.currentTime = 0;
+        state.isPlaying = true;
+        updateUI();
+        setScreen('now-playing');
+      }
+    }
+
+    /* Queue Rendering */
+    function renderQueue() {
+      const container = document.getElementById('queue-items-container');
+      if (!container) return;
+
+      let html = '';
+      ALBUMS.forEach((alb, aIdx) => {
+        alb.tracks.forEach((trk, tIdx) => {
+          const isCurrent = (aIdx === state.currentAlbumIndex && tIdx === state.currentTrackIndex);
+          html += `
+            <div class="queue-row ${isCurrent ? 'active' : ''}" onclick="selectQueueTrack(${aIdx}, ${tIdx})">
+              <div style="font-family:var(--font-mono); font-size:16px; font-weight:700; color:${isCurrent?'var(--accent)':'var(--text-low)'}; width:28px;">
+                ${isCurrent ? '▶' : `${aIdx * 4 + tIdx + 1}`}
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:16px; font-weight:700; color:var(--text-high); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  ${trk.title} ${isCurrent ? '<span style="color:var(--accent); font-size:12px; margin-left:8px;">[NOW PLAYING]</span>' : ''}
+                </div>
+                <div style="font-size:13px; color:var(--text-med);">${alb.artist} &bull; ${alb.title}</div>
+              </div>
+              <div style="font-size:11px; font-family:var(--font-mono); padding:3px 8px; border-radius:4px; background:var(--bg-base); border:1px solid var(--border);">
+                ${alb.source.toUpperCase()}
+              </div>
+              <div style="font-family:var(--font-mono); font-size:14px; color:var(--text-low);">${formatTime(trk.duration)}</div>
+            </div>
+          `;
+        });
+      });
+      container.innerHTML = html;
+    }
+
+    function selectQueueTrack(aIdx, tIdx) {
+      state.currentAlbumIndex = aIdx;
+      state.currentTrackIndex = tIdx;
+      state.currentTime = 0;
+      state.isPlaying = true;
+      updateUI();
+      setScreen('now-playing');
+    }
+
+    /* Offline Tracks */
+    function renderOfflineTracks() {
+      const container = document.getElementById('offline-tracks-container');
+      if (!container) return;
+
+      const offlineAlb = ALBUMS.filter(a => a.source === 'local' || a.source === 'usb');
+      container.innerHTML = offlineAlb.map(a => `
+        <div class="queue-row" onclick="playSelectedAlbum('${a.id}')">
+          <div style="font-size:20px;">💾</div>
+          <div style="flex:1;">
+            <div style="font-size:16px; font-weight:700; color:var(--text-high);">${a.title} (Cached Download)</div>
+            <div style="font-size:13px; color:var(--text-med);">${a.artist} &bull; ${a.tracksCount} tracks downloaded</div>
+          </div>
+          <div style="font-size:11px; background:#065f46; color:#6ee7b7; padding:3px 8px; border-radius:4px; font-weight:700;">OFFLINE OK</div>
+          <button class="nav-pill-btn" style="min-height:44px; padding:0 14px;">PLAY NOW</button>
+        </div>
+      `).join('');
+    }
+
+    /* Update Master UI */
+    function updateUI() {
+      const currentAlb = ALBUMS[state.currentAlbumIndex];
+      const statusText = currentAlb.source === 'local' ? 'STORAGE: LOCAL READY' :
+                         currentAlb.source === 'usb' ? 'STORAGE: USB 3.0 MOUNTED' :
+                         currentAlb.source === 'navidrome' ? 'NETWORK: NAVIDROME STREAM' : 'TUNER: RADIO ONLINE';
+      const statusElem = document.getElementById('sys-source-status');
+      if (statusElem) statusElem.textContent = statusText;
+
+      renderNowPlaying();
+      if (state.screen === 'library') renderLibraryScreen();
+      renderQueue();
+      renderDecisionsDrawer();
+      renderTokensDrawer();
+    }
+
+    /* Playback Simulation Timer */
+    function initPlaybackTimer() {
+      if (state.playbackTimer) clearInterval(state.playbackTimer);
+      state.playbackTimer = setInterval(() => {
+        if (state.isPlaying) {
+          state.currentTime++;
+          if (state.currentTime >= state.duration) {
+            nextTrack();
+          } else {
+            renderNowPlaying();
+          }
+        }
+      }, 1000);
+    }
+
+    /* Transport Controls */
+    function togglePlay() {
+      state.isPlaying = !state.isPlaying;
+      updateUI();
+    }
+
+    function nextTrack() {
+      const alb = ALBUMS[state.currentAlbumIndex];
+      if (state.currentTrackIndex < alb.tracks.length - 1) {
+        state.currentTrackIndex++;
+      } else {
+        state.currentAlbumIndex = (state.currentAlbumIndex + 1) % ALBUMS.length;
+        state.currentTrackIndex = 0;
+      }
+      state.currentTime = 0;
+      updateUI();
+    }
+
+    function prevTrack() {
+      if (state.currentTime > 4) {
+        state.currentTime = 0;
+      } else {
+        if (state.currentTrackIndex > 0) {
+          state.currentTrackIndex--;
+        } else {
+          state.currentAlbumIndex = (state.currentAlbumIndex - 1 + ALBUMS.length) % ALBUMS.length;
+          state.currentTrackIndex = ALBUMS[state.currentAlbumIndex].tracks.length - 1;
+        }
+        state.currentTime = 0;
+      }
+      updateUI();
+    }
+
+    function handleSeek(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+      state.currentTime = Math.floor(ratio * state.duration);
+      renderNowPlaying();
+    }
+
+    function toggleShuffle() {
+      state.isShuffle = !state.isShuffle;
+      showToast(state.isShuffle ? "Shuffle Mode ON" : "Shuffle Mode OFF");
+    }
+
+    function toggleRepeat() {
+      state.isRepeat = !state.isRepeat;
+      showToast(state.isRepeat ? "Repeat All ON" : "Repeat Mode OFF");
+    }
+
+    /* Switchers Handlers */
+    function setDirection(dir, silent = false) {
+      state.direction = dir;
+      const screen = document.getElementById('headunit-screen');
+      screen.setAttribute('data-direction', dir);
+
+      // Kopitiam defaults to Day-first unless user manually set night!
+      if (dir === 'c' && !window._manualThemeSet) {
+        setTheme('day', true);
+      } else if (dir !== 'c' && !window._manualThemeSet) {
+        setTheme('night', true);
+      }
+
+      document.querySelectorAll('.pill-btn.pill-a, .pill-btn.pill-b, .pill-btn.pill-c').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.querySelector(`.pill-${dir}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      updateUI();
+      if (!silent) showToast(`Direction ${dir.toUpperCase()} Loaded`);
+    }
+
+    function setScreen(screenName) {
+      state.screen = screenName;
+      document.querySelectorAll('.screen-view').forEach(v => v.classList.remove('active'));
+
+      const target = document.getElementById(`view-${screenName}`);
+      if (target) target.classList.add('active');
+
+      const map = {
+        'now-playing': 'btn-screen-np',
+        'library': 'btn-screen-lib',
+        'queue': 'btn-screen-queue',
+        'empty': 'btn-screen-empty',
+        'error': 'btn-screen-error'
+      };
+      document.querySelectorAll('#btn-screen-np, #btn-screen-lib, #btn-screen-queue, #btn-screen-empty, #btn-screen-error').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(map[screenName]);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (screenName === 'library') renderLibraryScreen();
+      if (screenName === 'now-playing') renderNowPlaying();
+      if (screenName === 'error') renderOfflineTracks();
+    }
+
+    function setSize(res) {
+      state.resolution = res;
+      const screen = document.getElementById('headunit-screen');
+      const tag = document.getElementById('bezel-res-tag');
+
+      if (res === '720') {
+        screen.classList.add('size-720p');
+        tag.textContent = '1280 × 720 px (9"/10" Wide HD)';
+      } else {
+        screen.classList.remove('size-720p');
+        tag.textContent = '1024 × 600 px (7" Standard Landscape)';
+      }
+
+      document.getElementById('btn-size-600').classList.toggle('active', res === '600');
+      document.getElementById('btn-size-720').classList.toggle('active', res === '720');
+      updateUI();
+    }
+
+    function setTheme(th, silent = false) {
+      state.theme = th;
+      const screen = document.getElementById('headunit-screen');
+      screen.setAttribute('data-theme', th);
+
+      document.getElementById('btn-theme-night').classList.toggle('active', th === 'night');
+      document.getElementById('btn-theme-day').classList.toggle('active', th === 'day');
+
+      renderTokensDrawer();
+      if (!silent) {
+        window._manualThemeSet = true;
+        showToast(th === 'day' ? "☀️ Day Mode: High Sunlight Visibility" : "🌙 Night Mode: Zero Glare Minimal");
+      }
+    }
+
+    function toggleDrawer(which) {
+      const drawer = document.getElementById(`drawer-${which}`);
+      const btn = document.getElementById(`btn-toggle-${which}`);
+      const other = which === 'decisions' ? document.getElementById('drawer-tokens') : document.getElementById('drawer-decisions');
+      const otherBtn = which === 'decisions' ? document.getElementById('btn-toggle-tokens') : document.getElementById('btn-toggle-decisions');
+
+      other.classList.remove('open');
+      otherBtn.classList.remove('active');
+
+      drawer.classList.toggle('open');
+      btn.classList.toggle('active', drawer.classList.contains('open'));
+    }
+
+    function simulatePermissionGrant() {
+      state.permissionGranted = true;
+      showToast("Storage Permission Granted! Scanning audio files...");
+      setTimeout(() => { setScreen('library'); }, 700);
+    }
+
+    function simulateRetryServer() {
+      showToast("Connecting to Navidrome (my-cloud.home:4533)...");
+      setTimeout(() => {
+        showToast("Connected! Syncing library...");
+        setScreen('now-playing');
+      }, 1200);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-box');
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.add('visible');
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 2000);
+    }
+
+    /* Render Decisions Drawer dynamically per direction */
+    function renderDecisionsDrawer() {
+      const tbody = document.getElementById('decisions-tbody');
+      const title = document.getElementById('decisions-drawer-title');
+      const intro = document.getElementById('decisions-direction-intro');
+      if (!tbody) return;
+
+      const d = state.direction;
+      const dirNames = {
+        'a': 'Direction A: Night Drive (Split Asymmetric Layout)',
+        'b': 'Direction B: Dashboard (Instrument Cluster Cockpit Layout)',
+        'c': 'Direction C: Kopitiam (Day-First Centered Stack & Pill Row)'
+      };
+      title.textContent = `Design Decisions (${d.toUpperCase()})`;
+
+      const dirSpecificRows = {
+        'a': {
+          intro: 'Direction A uses an asymmetric split layout (artwork left, large controls right) on a deep OLED midnight canvas with a warm 590nm amber accent. Optimized for right-hand-drive vehicles and night vision preservation.',
+          decision: '<strong>Asymmetric Split Screen (Art Left, Controls Right)</strong>',
+          why: 'In RHD Malaysian vehicles, placing large primary controls on the right half positions them closest to the driver left hand and aligns directly with the road horizon.',
+          alt: 'Full-bleed background artwork with centered controls',
+          tradeoff: 'Artwork is bounded to 320–400px rather than whole-screen canvas.'
+        },
+        'b': {
+          intro: 'Direction B adopts an automotive digital instrument-cluster structure: full-width bottom deck of massive thumb buttons, circular arc progress gauge around smaller centered artwork, track title above, and status telemetry chips along the top edge.',
+          decision: '<strong>Instrument Cluster HUD (Arc Gauge + Full-Width Bottom Thumb Bar)</strong>',
+          why: 'Full-width bottom bar allows natural resting thumb taps while resting wrist on lower dash rim. Arc progress gauge mimics tachometer/speedometer telemetry.',
+          alt: 'Standard vertical mobile card stack',
+          tradeoff: 'Higher visual density; looks intentionally like an instrument cluster.'
+        },
+        'c': {
+          intro: 'Direction C is a day-first light theme by default (warm cream and teal) with rounded friendly Outfit typography, large centered artwork, big title below, and controls in a floating pill row. Library uses large rounded cards.',
+          decision: '<strong>Day-First Centered Stack with Floating Pill Control Bar</strong>',
+          why: 'Fights intense tropical midday Malaysian sunlight with warm cream (#FAF5EE) and high-contrast dark coffee typography. Floating pill row creates calm, friendly touch targets.',
+          alt: 'Industrial dark cockpit dials',
+          tradeoff: 'Large 24px pill padding reduces maximum simultaneous list rows.'
+        }
+      };
+
+      const spec = dirSpecificRows[d];
+      intro.innerHTML = `<strong>${dirNames[d]}</strong>: ${spec.intro}`;
+
+      tbody.innerHTML = `
+        <tr style="background:rgba(59, 130, 246, 0.08);">
+          <td><span style="display:inline-block; padding:2px 6px; background:var(--accent); color:var(--accent-contrast); border-radius:4px; font-weight:700; font-size:10px;">STRUCTURAL DIR ${d.toUpperCase()}</span><br>${spec.decision}</td>
+          <td>${spec.why}</td>
+          <td>${spec.alt}</td>
+          <td>${spec.tradeoff}</td>
+        </tr>
+        <tr>
+          <td><strong>Primary Touch Targets &ge; 76dp</strong> (Play/Pause 92dp)</td>
+          <td>Car vibrates over uneven Malaysian tarmac &amp; speed bumps. Drivers glance for &lt;0.5s; large targets prevent mis-taps.</td>
+          <td>Material 48dp standard targets</td>
+          <td>Fewer secondary buttons on screen</td>
+        </tr>
+        <tr>
+          <td><strong>Tabular Numerals for Elapsed/Remaining Time</strong></td>
+          <td>Prevents layout jitter as numbers tick every second. Drivers read time in a 0.2s glance.</td>
+          <td>Proportional numerals</td>
+          <td>Slightly wider text footprint</td>
+        </tr>
+        <tr>
+          <td><strong>Dedicated Dual Palettes (Night Zero-Glare &amp; Day Sunlight)</strong></td>
+          <td>Day mode combats tropical midday sunlight without tinting; Night mode eliminates glare and pupil dilation on dark roads.</td>
+          <td>Single adaptive gray theme</td>
+          <td>Requires managing dual token sets</td>
+        </tr>
+        <tr>
+          <td><strong>Top-Level Horizontal Source Tabs</strong> (Local, USB, Radio, Navidrome)</td>
+          <td>Single-tap source switching. Hamburger menus and nested drawers cause lethal driver distraction.</td>
+          <td>Drawer / Hamburger slide menu</td>
+          <td>Limits visible top-level sources to 4&ndash;5 items</td>
+        </tr>
+        <tr>
+          <td><strong>Automatic Seamless Offline Fallback</strong></td>
+          <td>Malaysian tunnels (SMART) and rural PLUS highway dead-zones lose cellular data; auto-switches to local cache with zero silence.</td>
+          <td>Modal error popup that halts playback</td>
+          <td>Shows reduced song catalog until reconnected</td>
+        </tr>
+        <tr>
+          <td><strong>Coarse Scrubbing Bar &plusmn;15s Stepping</strong></td>
+          <td>Fine scrubbing with tiny thumbs while driving is dangerous. Large tap-to-seek and coarse jumps are safer.</td>
+          <td>Thin 2px draggable slider</td>
+          <td>Less precision for 1-second seeking</td>
+        </tr>
+        <tr>
+          <td><strong>Malaysian Cultural Identity ("Syok")</strong></td>
+          <td>Warm, local Manglish branding evokes genuine enjoyment and community connection, unlike sterile corporate audio SaaS.</td>
+          <td>Generic English music branding ("CarPlayer Pro")</td>
+          <td>Manglish nuance requires brief intro for expats</td>
+        </tr>
+      `;
+    }
+
+    /* Tokens Panel */
+    function renderTokensDrawer() {
+      const container = document.getElementById('tokens-content');
+      if (!container) return;
+
+      const d = state.direction;
+      const th = state.theme;
+      const dirNames = {
+        'a': 'Direction A: Night Drive (Amber Glow & Deep Minimal)',
+        'b': 'Direction B: Dashboard (Cockpit Instrument Cluster Cyan)',
+        'c': 'Direction C: Kopitiam (Day-First Warm Cream & Teal)'
+      };
+      document.getElementById('tokens-drawer-title').textContent = dirNames[d];
+
+      const tokenData = {
+        'a': {
+          night: { bg: '#0a0d14', surface: '#121722', card: '#182030', accent: '#ff9f0a', textHigh: '#ffffff', contrastAccent: '10.8:1 (AAA)', contrastText: '18.5:1 (AAA)' },
+          day: { bg: '#f1f5f9', surface: '#ffffff', card: '#e2e8f0', accent: '#d97706', textHigh: '#0f172a', contrastAccent: '4.6:1 (AA)', contrastText: '17.2:1 (AAA)' },
+          font: 'Plus Jakarta Sans (Display) + JetBrains Mono (Numbers)',
+          radius: '12px (Balanced Modern Automotive)',
+          targets: 'Play/Pause: 92px | Prev/Next: 78px | Secondary: 56px'
+        },
+        'b': {
+          night: { bg: '#0b0f15', surface: '#131a24', card: '#1a2533', accent: '#00e5ff', textHigh: '#f0f6fc', contrastAccent: '12.2:1 (AAA)', contrastText: '17.8:1 (AAA)' },
+          day: { bg: '#e2e8f0', surface: '#f1f5f9', card: '#cbd5e1', accent: '#0284c7', textHigh: '#0f172a', contrastAccent: '4.8:1 (AA)', contrastText: '16.5:1 (AAA)' },
+          font: 'Chakra Petch (Cockpit Digital) + Chakra Petch (Numbers)',
+          radius: '6px (Chamfered Beveled Telemetry)',
+          targets: 'Play/Pause: 86px dock | Prev/Next: 86px dock | Taps: Full-width'
+        },
+        'c': {
+          day: { bg: '#faf5ee', surface: '#ffffff', card: '#f3ece1', accent: '#0d9488', textHigh: '#2a1c15', contrastAccent: '5.2:1 (AA)', contrastText: '16.2:1 (AAA)' },
+          night: { bg: '#17120f', surface: '#241c17', card: '#342721', accent: '#14b8a6', textHigh: '#fff7ed', contrastAccent: '9.6:1 (AAA)', contrastText: '16.8:1 (AAA)' },
+          font: 'Outfit (Warm Humanist) + JetBrains Mono (Numbers)',
+          radius: '24px (Friendly Pebble/Pill Shapes)',
+          targets: 'Play/Pause: 96x76px pill | Prev/Next: 72px pill | Taps: 52px+'
+        }
+      };
+
+      const cur = tokenData[d][th] || tokenData[d]['day'] || tokenData[d]['night'];
+
+      container.innerHTML = `
+        <div style="margin-bottom:20px;">
+          <h4 style="font-size:13px; text-transform:uppercase; color:#38bdf8; margin-bottom:10px;">Active: ${d.toUpperCase()} &bull; ${th.toUpperCase()}</h4>
+          <div style="font-size:12px; line-height:1.8;">
+            <div>&bull; <strong>Background:</strong> <code>${cur.bg}</code></div>
+            <div>&bull; <strong>Surface:</strong> <code>${cur.surface}</code></div>
+            <div>&bull; <strong>Primary Accent:</strong> <code>${cur.accent}</code> (${cur.contrastAccent})</div>
+            <div>&bull; <strong>Text High:</strong> <code>${cur.textHigh}</code> (${cur.contrastText})</div>
+            <div>&bull; <strong>Typography:</strong> ${tokenData[d].font}</div>
+            <div>&bull; <strong>Radius:</strong> ${tokenData[d].radius}</div>
+            <div>&bull; <strong>Touch Targets:</strong> ${tokenData[d].targets}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* URL Parameter Evaluation */
+    function parseUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('direction')) setDirection(params.get('direction').toLowerCase(), true);
+      if (params.has('theme')) setTheme(params.get('theme').toLowerCase(), true);
+      if (params.has('screen')) setScreen(params.get('screen').toLowerCase());
+      if (params.has('size')) setSize(params.get('size'));
+      if (params.has('standalone') && params.get('standalone') === 'true') {
+        document.querySelector('.prototype-header').style.display = 'none';
+        document.body.style.padding = '0';
+        document.body.style.background = '#000000';
+        document.querySelector('.bezel-frame').style.padding = '0';
+        document.querySelector('.bezel-frame').style.border = 'none';
+        document.querySelector('.bezel-frame').style.borderRadius = '0';
+        document.querySelector('.bezel-top-status').style.display = 'none';
+      }
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, '0');
+      const m = now.getMinutes().toString().padStart(2, '0');
+      const el = document.getElementById('live-clock');
+      if (el) el.textContent = `SYS TIME: ${h}:${m}`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderOfflineTracks();
+      updateClock();
+      setInterval(updateClock, 30000);
+      parseUrlParams();
+      updateUI();
+      initPlaybackTimer();
+    });
+  </script>
+</body>
+</html>

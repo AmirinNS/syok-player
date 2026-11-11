@@ -1,0 +1,1 @@
+# Syok Proguard Rules
