@@ -2,6 +2,7 @@ package io.github.amirinns.syok.ui
 
 import android.content.ComponentName
 import android.content.Context
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -152,6 +153,10 @@ class LocalPlaybackTest {
 
         composeTestRule.onNodeWithText("Jalan Telawi Echoes").assertIsDisplayed()
         composeTestRule.onNodeWithText("Klang Valley Trio").assertIsDisplayed()
+
+        // Local tracks are not live: no LIVE labels, scrubber stays.
+        composeTestRule.onAllNodesWithText("LOCAL SOURCE").onFirst().assertIsDisplayed()
+        composeTestRule.onAllNodesWithText("LIVE BROADCAST").assertCountEquals(0)
     }
 
     @Test

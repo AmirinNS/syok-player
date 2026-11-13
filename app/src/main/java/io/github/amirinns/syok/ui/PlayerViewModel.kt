@@ -255,7 +255,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         val position = player.currentPosition.coerceAtLeast(0L)
 
         val isStation = RadioSource.isStationMediaId(currentItem?.mediaId)
-        val isLive = isStation || currentItem?.liveConfiguration != null
+        val isLive = isStation || player.isCurrentMediaItemLive
 
         _playbackState.value = _playbackState.value.copy(
             isConnected = true,

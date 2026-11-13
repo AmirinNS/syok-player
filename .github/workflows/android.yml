@@ -76,4 +76,7 @@ jobs:
           target: google_apis
           profile: pixel_3a
           disable-animations: true
-          script: ./gradlew :app:connectedDebugAndroidTest
+          # Head-unit landscape size, the same as the local verification runs.
+          script: |
+            adb shell wm size 1024x600
+            ./gradlew :app:connectedDebugAndroidTest
