@@ -79,4 +79,4 @@ jobs:
           # Head-unit landscape size, the same as the local verification runs.
           script: |
             adb shell wm size 1024x600
-            ./gradlew :app:connectedDebugAndroidTest || { adb logcat -d -v time | grep -iE 'ExoPlayer|AudioTrack|AudioFocus|MediaCodec|PlaybackException|syok' | tail -n 300; exit 1; }
+            ./gradlew :app:connectedDebugAndroidTest || { adb logcat -d -v time | grep -iE 'ExoPlayer|AudioTrack|AudioFocus|MediaCodec|PlaybackException|syok|LocalPlaybackTest' | tail -n 300; exit 1; }

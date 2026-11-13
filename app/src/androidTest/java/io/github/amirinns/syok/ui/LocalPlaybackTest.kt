@@ -2,13 +2,16 @@ package io.github.amirinns.syok.ui
 
 import android.content.ComponentName
 import android.content.Context
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.printToLog
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.test.core.app.ApplicationProvider
@@ -178,28 +181,14 @@ class LocalPlaybackTest {
         composeTestRule.waitForIdle()
 
         // Wait for player to enter playing state and show pause button ("❚❚")
-        composeTestRule.waitUntil(timeoutMillis = 10000L) {
-            try {
-                composeTestRule.onAllNodesWithText("❚❚").onFirst().assertIsDisplayed()
-                true
-            } catch (_: Throwable) {
-                false
-            }
-        }
+        waitForPlaybackGlyph("❚❚")
 
         // Tap Play/Pause button ("❚❚")
         composeTestRule.onAllNodesWithText("❚❚").onFirst().performClick()
         composeTestRule.waitForIdle()
 
         // Now button should show "▶"
-        composeTestRule.waitUntil(timeoutMillis = 10000L) {
-            try {
-                composeTestRule.onAllNodesWithText("▶").onFirst().assertIsDisplayed()
-                true
-            } catch (_: Throwable) {
-                false
-            }
-        }
+        waitForPlaybackGlyph("▶")
         composeTestRule.onAllNodesWithText("▶").onFirst().assertIsDisplayed()
 
         // Reconnect test: recreate activity
@@ -217,5 +206,23 @@ class LocalPlaybackTest {
             }
         }
         composeTestRule.onNodeWithText("Jalan Telawi Echoes").assertIsDisplayed()
+    }
+
+    // Playback state can take longer to reach the UI on slow CI emulators (x86_64, software
+    // rendering). On timeout, log the semantics tree so the failure shows what was on screen.
+    private fun waitForPlaybackGlyph(glyph: String) {
+        try {
+            composeTestRule.waitUntil(timeoutMillis = 30000L) {
+                try {
+                    composeTestRule.onAllNodesWithText(glyph).onFirst().assertIsDisplayed()
+                    true
+                } catch (_: Throwable) {
+                    false
+                }
+            }
+        } catch (e: ComposeTimeoutException) {
+            composeTestRule.onRoot(useUnmergedTree = true).printToLog("LocalPlaybackTest")
+            throw e
+        }
     }
 }
