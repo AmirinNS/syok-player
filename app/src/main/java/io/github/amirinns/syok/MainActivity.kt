@@ -28,18 +28,34 @@ import io.github.amirinns.syok.ui.LibraryScreen
 import io.github.amirinns.syok.ui.NowPlayingScreen
 import io.github.amirinns.syok.ui.PlayerViewModel
 import io.github.amirinns.syok.ui.QueueScreen
+import io.github.amirinns.syok.ui.SourcesScreen
 import io.github.amirinns.syok.ui.theme.SyokNightBase
 import io.github.amirinns.syok.ui.theme.SyokTheme
 
 enum class SyokScreen {
     LIBRARY,
     NOW_PLAYING,
-    QUEUE
+    QUEUE,
+    SOURCES
 }
 
 class MainActivity : ComponentActivity() {
 
     private val playerViewModel: PlayerViewModel by viewModels()
+
+    override fun onResume() {
+        super.onResume()
+        playerViewModel.refreshFolders()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // Re-hide the system bars after a dialog, permission prompt, or transient swipe.
+        if (hasFocus) {
+            WindowCompat.getInsetsController(window, window.decorView)
+                .hide(WindowInsetsCompat.Type.systemBars())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +68,9 @@ class MainActivity : ComponentActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         insetsController.isAppearanceLightStatusBars = false
         insetsController.isAppearanceLightNavigationBars = false
+        // Head units run the player full screen: hide both system bars; a swipe from an
+        // edge shows them briefly (BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE above).
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
 
         val requiredPermissions = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -107,6 +126,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToNowPlaying = {
                                     currentScreen = SyokScreen.NOW_PLAYING
+                                },
+                                onNavigateToSources = {
+                                    currentScreen = SyokScreen.SOURCES
                                 }
                             )
                         }
@@ -118,8 +140,14 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToQueue = {
                                     currentScreen = SyokScreen.QUEUE
+                                },
+                                onNavigateToSources = {
+                                    currentScreen = SyokScreen.SOURCES
                                 }
                             )
+                        }
+                        SyokScreen.SOURCES -> {
+                            SourcesScreen(playerViewModel) { currentScreen = SyokScreen.LIBRARY }
                         }
                         SyokScreen.QUEUE -> {
                             QueueScreen(

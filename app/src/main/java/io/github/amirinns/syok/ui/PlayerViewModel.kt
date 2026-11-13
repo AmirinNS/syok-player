@@ -15,6 +15,10 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import io.github.amirinns.syok.SyokApplication
 import io.github.amirinns.syok.data.TrackEntity
+import io.github.amirinns.syok.data.FolderEntity
+import io.github.amirinns.syok.radio.RadioSource
+import io.github.amirinns.syok.radio.StationEntity
+import io.github.amirinns.syok.radio.StationValidator
 import io.github.amirinns.syok.playback.PlaybackService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -22,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -52,7 +57,10 @@ data class PlaybackUiState(
     val shuffleEnabled: Boolean = false,
     val repeatMode: Int = Player.REPEAT_MODE_OFF,
     val errorMessage: String? = null,
-    val nextTrackTitle: String? = null
+    val nextTrackTitle: String? = null,
+    val isLive: Boolean = false,
+    val isStation: Boolean = false,
+    val stationError: String? = null
 )
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
@@ -61,6 +69,28 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private val libraryDao = appContainer.libraryDao
     val mediaStoreSource = appContainer.mediaStoreSource
     val artworkLoader = appContainer.artworkLoader
+    private val safSource = appContainer.safSource
+    val radioSource = appContainer.radioSource
+    private var folderJob: Job? = null
+    private val _folderBusy = MutableStateFlow(false)
+    val folderBusy = _folderBusy.asStateFlow()
+    private val _folderMessage = MutableStateFlow<String?>(null)
+    val folderMessage = _folderMessage.asStateFlow()
+    private val _folderPlaybackError = MutableStateFlow<String?>(null)
+    val folderPlaybackError = _folderPlaybackError.asStateFlow()
+    val folders = libraryDao.observeFolders().stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+
+    val stations = radioSource.observeStations().stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+
+    private var stationRetryCount = 0
+    private val MAX_STATION_RETRIES = 3
+    private var stationRetryJob: Job? = null
+    private val _stationPlaybackError = MutableStateFlow<String?>(null)
+    val stationPlaybackError: StateFlow<String?> = _stationPlaybackError.asStateFlow()
 
     private var mediaController: MediaController? = null
     private var progressJob: Job? = null
@@ -96,6 +126,20 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         connectController()
+        viewModelScope.launch {
+            libraryDao.getAllTracks().collect { tracks ->
+                if (_folderBusy.value) return@collect
+                val availableIds = tracks.mapTo(mutableSetOf()) { it.id }
+                val controller = mediaController ?: return@collect
+                for (index in controller.mediaItemCount - 1 downTo 0) {
+                    val id = controller.getMediaItemAt(index).mediaId
+                    if (id.startsWith("saf:") && id !in availableIds) {
+                        controller.removeMediaItem(index)
+                        _folderPlaybackError.value = "Folder unavailable. Reconnect the drive or choose the folder again in Sources."
+                    }
+                }
+            }
+        }
     }
 
     private fun connectController() {
@@ -131,10 +175,58 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
 
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            if (playbackState == Player.STATE_READY) {
+                if (stationRetryCount > 0 || _stationPlaybackError.value != null) {
+                    stationRetryCount = 0
+                    _stationPlaybackError.value = null
+                    _playbackState.value = _playbackState.value.copy(errorMessage = null)
+                }
+            }
+        }
+
         override fun onPlayerError(error: PlaybackException) {
-            _playbackState.value = _playbackState.value.copy(
-                errorMessage = "Playback error: ${error.localizedMessage}"
-            )
+            val currentId = mediaController?.currentMediaItem?.mediaId
+            val folderTrack = currentId?.startsWith("saf:") == true
+            val stationTrack = RadioSource.isStationMediaId(currentId)
+
+            if (folderTrack) {
+                _playbackState.value = _playbackState.value.copy(
+                    errorMessage = "Folder unavailable. Reconnect the drive or choose the folder again in Sources."
+                )
+                _folderPlaybackError.value = "Folder unavailable. Reconnect the drive or choose the folder again in Sources."
+                viewModelScope.launch { safSource.refreshAvailability() }
+            } else if (stationTrack) {
+                if (stationRetryCount < MAX_STATION_RETRIES) {
+                    stationRetryCount++
+                    val attempt = stationRetryCount
+                    val retryMsg = "Connecting to station failed. Retrying ($attempt/$MAX_STATION_RETRIES)..."
+                    _stationPlaybackError.value = retryMsg
+                    _playbackState.value = _playbackState.value.copy(
+                        errorMessage = retryMsg,
+                        isBuffering = true
+                    )
+                    stationRetryJob?.cancel()
+                    stationRetryJob = viewModelScope.launch {
+                        delay(1000L * attempt)
+                        val controller = mediaController ?: return@launch
+                        controller.prepare()
+                        controller.play()
+                    }
+                } else {
+                    val finalMsg = "Station unreachable after $MAX_STATION_RETRIES retries. Tap Retry to reconnect."
+                    _stationPlaybackError.value = finalMsg
+                    _playbackState.value = _playbackState.value.copy(
+                        errorMessage = finalMsg,
+                        isPlaying = false,
+                        isBuffering = false
+                    )
+                }
+            } else {
+                _playbackState.value = _playbackState.value.copy(
+                    errorMessage = "Playback error: ${error.localizedMessage}"
+                )
+            }
         }
     }
 
@@ -162,6 +254,9 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         val duration = if (player.duration > 0L) player.duration else 0L
         val position = player.currentPosition.coerceAtLeast(0L)
 
+        val isStation = RadioSource.isStationMediaId(currentItem?.mediaId)
+        val isLive = isStation || currentItem?.liveConfiguration != null
+
         _playbackState.value = _playbackState.value.copy(
             isConnected = true,
             currentMediaItem = currentItem,
@@ -178,8 +273,11 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             queue = queue,
             shuffleEnabled = player.shuffleModeEnabled,
             repeatMode = player.repeatMode,
-            errorMessage = null,
-            nextTrackTitle = nextTitle
+            errorMessage = if (player.playerError != null) _playbackState.value.errorMessage else null,
+            nextTrackTitle = nextTitle,
+            isLive = isLive,
+            isStation = isStation,
+            stationError = _stationPlaybackError.value
         )
 
         if (player.isPlaying) {
@@ -212,7 +310,12 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun playAlbum(album: AlbumUiModel, startIndex: Int = 0) {
-        val controller = mediaController ?: return
+        val controller = mediaController
+        if (controller == null) return
+        _folderPlaybackError.value = null
+        _stationPlaybackError.value = null
+        stationRetryCount = 0
+        stationRetryJob?.cancel()
         val mediaItems = album.tracks.map { track ->
             MediaItem.Builder()
                 .setMediaId(track.id)
@@ -235,6 +338,64 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         controller.setMediaItems(mediaItems, targetIndex, 0L)
         controller.prepare()
         controller.play()
+    }
+
+    fun playStation(station: StationEntity) {
+        val controller = mediaController ?: return
+        _folderPlaybackError.value = null
+        _stationPlaybackError.value = null
+        stationRetryCount = 0
+        stationRetryJob?.cancel()
+
+        val item = RadioSource.createStationPlayableItem(station)
+        controller.setMediaItem(item)
+        controller.prepare()
+        controller.play()
+    }
+
+    fun retryStationPlayback() {
+        val controller = mediaController ?: return
+        stationRetryJob?.cancel()
+        stationRetryCount = 0
+        _stationPlaybackError.value = null
+        _playbackState.value = _playbackState.value.copy(errorMessage = null, isBuffering = true)
+        controller.prepare()
+        controller.play()
+    }
+
+    fun addStation(name: String, url: String): StationValidator.Result {
+        val result = StationValidator.validate(name, url)
+        if (result is StationValidator.Result.Valid) {
+            viewModelScope.launch {
+                radioSource.addStation(name, url)
+            }
+        }
+        return result
+    }
+
+    fun updateStation(id: Long, name: String, url: String): StationValidator.Result {
+        val result = StationValidator.validate(name, url)
+        if (result is StationValidator.Result.Valid) {
+            viewModelScope.launch {
+                radioSource.updateStation(id, name, url)
+            }
+        }
+        return result
+    }
+
+    fun deleteStation(station: StationEntity) {
+        viewModelScope.launch {
+            val controller = mediaController
+            if (controller != null) {
+                val stationMediaId = RadioSource.stationMediaId(station.id)
+                for (index in controller.mediaItemCount - 1 downTo 0) {
+                    if (controller.getMediaItemAt(index).mediaId == stationMediaId) {
+                        controller.removeMediaItem(index)
+                    }
+                }
+            }
+            radioSource.deleteStation(station)
+        }
     }
 
     fun togglePlayPause() {
@@ -301,6 +462,60 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             val res = mediaStoreSource.scan()
             _isScanning.value = false
             onComplete?.invoke(res)
+        }
+    }
+
+    fun reportFolderError(message: String) {
+        _folderMessage.value = message
+    }
+
+    fun refreshFolders() {
+        viewModelScope.launch { safSource.refreshAvailability() }
+    }
+
+    fun addFolder(uri: Uri, flags: Int, replacing: Uri? = null) {
+        runFolderAction { safSource.addFolder(uri, flags, replacing) }
+    }
+
+    fun retryFolder(folder: FolderEntity) {
+        runFolderAction { safSource.scanFolder(Uri.parse(folder.treeUri)) }
+    }
+
+    fun removeFolder(folder: FolderEntity) {
+        folderJob?.cancel()
+        folderJob = viewModelScope.launch {
+            _folderBusy.value = true
+            try {
+                val controller = mediaController
+                if (controller != null) {
+                    for (index in controller.mediaItemCount - 1 downTo 0) {
+                        val track = libraryDao.getTrackById(controller.getMediaItemAt(index).mediaId)
+                        if (track?.sourceId == folder.treeUri) controller.removeMediaItem(index)
+                    }
+                }
+                safSource.removeFolder(Uri.parse(folder.treeUri))
+                _folderMessage.value = "Folder removed. Original files are unchanged. Add folder to reconnect."
+            } finally {
+                _folderBusy.value = false
+            }
+        }
+    }
+
+    private fun runFolderAction(action: suspend () -> Result<Int>) {
+        if (folderJob?.isActive == true) return
+        folderJob = viewModelScope.launch {
+            _folderBusy.value = true
+            _folderMessage.value = "Indexing music…"
+            try {
+                val result = action()
+                if (result.isSuccess) _folderPlaybackError.value = null
+                _folderMessage.value = result.fold(
+                    onSuccess = { "Indexed $it tracks. Open Library to play." },
+                    onFailure = { it.message ?: "Folder unavailable. Reconnect or retry indexing." }
+                )
+            } finally {
+                _folderBusy.value = false
+            }
         }
     }
 

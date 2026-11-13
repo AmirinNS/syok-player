@@ -51,16 +51,22 @@ class BrowseTreeTest {
 
     @Test
     fun testStableRootAndLocalIds() = runBlocking {
-        // Root children must expose the stable Local branch
+        // Root children must expose the stable Local and Stations branches
         val rootChildren = browseTree.children(BrowseTree.ROOT_ID)
         assertNotNull(rootChildren)
-        assertEquals(1, rootChildren!!.size)
+        assertEquals(2, rootChildren!!.size)
 
         val localNode = rootChildren[0]
         assertEquals(BrowseTree.LOCAL_ID, localNode.mediaId)
         assertEquals("Local", localNode.mediaMetadata.title.toString())
         assertTrue(localNode.mediaMetadata.isBrowsable == true)
         assertTrue(localNode.mediaMetadata.isPlayable == false)
+
+        val stationsNode = rootChildren[1]
+        assertEquals(BrowseTree.STATIONS_ID, stationsNode.mediaId)
+        assertEquals("Stations", stationsNode.mediaMetadata.title.toString())
+        assertTrue(stationsNode.mediaMetadata.isBrowsable == true)
+        assertTrue(stationsNode.mediaMetadata.isPlayable == false)
     }
 
     @Test
@@ -185,15 +191,39 @@ class BrowseTreeTest {
 
     @Test
     fun testEmptyLibraries() = runBlocking {
-        // Root still shows local source category
+        // Root still shows local and stations source categories
         val rootChildren = browseTree.children(BrowseTree.ROOT_ID)
         assertNotNull(rootChildren)
-        assertEquals(1, rootChildren!!.size)
+        assertEquals(2, rootChildren!!.size)
 
         // Local branch has 0 albums in an empty library
         val localChildren = browseTree.children(BrowseTree.LOCAL_ID)
         assertNotNull(localChildren)
         assertTrue(localChildren!!.isEmpty())
+
+        // Stations branch has 0 stations in an empty library
+        val stationsChildren = browseTree.children(BrowseTree.STATIONS_ID)
+        assertNotNull(stationsChildren)
+        assertTrue(stationsChildren!!.isEmpty())
+    }
+
+    @Test
+    fun testStationsBranch_returnsPlayableStationItems() = runBlocking {
+        val station = io.github.amirinns.syok.radio.StationEntity(
+            name = "Radio Paradise",
+            url = "https://stream.radioparadise.com/aac-128"
+        )
+        val id = libraryDao.upsertStation(station)
+
+        val stationChildren = browseTree.children(BrowseTree.STATIONS_ID)
+        assertNotNull(stationChildren)
+        assertEquals(1, stationChildren!!.size)
+
+        val item = stationChildren[0]
+        assertEquals("station:$id", item.mediaId)
+        assertEquals("Radio Paradise", item.mediaMetadata.title.toString())
+        assertTrue(item.mediaMetadata.isPlayable == true)
+        assertFalse(item.mediaMetadata.isBrowsable == true)
     }
 
     @Test

@@ -12,7 +12,9 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
+import androidx.media3.session.SessionResult
 import io.github.amirinns.syok.data.LibraryDao
+import io.github.amirinns.syok.radio.RadioSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -75,13 +77,31 @@ class LibraryCallback(
             .build()
     }
 
+    override fun onPlayerCommandRequest(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        playerCommand: Int
+    ): Int {
+        val currentItem = session.player.currentMediaItem
+        if (currentItem != null && RadioSource.isStationMediaId(currentItem.mediaId)) {
+            // Live semantics: do not offer seek commands for stations
+            when (playerCommand) {
+                androidx.media3.common.Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM,
+                androidx.media3.common.Player.COMMAND_SEEK_BACK,
+                androidx.media3.common.Player.COMMAND_SEEK_FORWARD -> {
+                    return SessionResult.RESULT_ERROR_NOT_SUPPORTED
+                }
+            }
+        }
+        return SessionResult.RESULT_SUCCESS
+    }
+
     override fun onAddMediaItems(
         mediaSession: MediaSession,
         controller: MediaSession.ControllerInfo,
         mediaItems: List<MediaItem>
     ): ListenableFuture<List<MediaItem>> {
         val future = SettableFuture.create<List<MediaItem>>()
-
         scope.launch {
             try {
                 val resolvedItems = mutableListOf<MediaItem>()
@@ -89,6 +109,17 @@ class LibraryCallback(
                     val mediaId = item.mediaId
                     // Reject empty IDs or items where caller supplied arbitrary external URIs without a known ID
                     if (mediaId.isBlank()) continue
+
+                    if (RadioSource.isStationMediaId(mediaId)) {
+                        val stationId = RadioSource.parseStationId(mediaId)
+                        if (stationId != null) {
+                            val station = libraryDao.getStation(stationId)
+                            if (station != null) {
+                                resolvedItems.add(RadioSource.createStationPlayableItem(station))
+                            }
+                        }
+                        continue
+                    }
 
                     val track = libraryDao.getTrackById(mediaId)
                     if (track != null && track.isAvailable) {

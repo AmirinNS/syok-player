@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,16 +26,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.amirinns.syok.radio.StationEntity
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import io.github.amirinns.syok.R
 import io.github.amirinns.syok.ui.components.ArtworkImage
 import io.github.amirinns.syok.ui.components.SystemHeaderBar
 import io.github.amirinns.syok.ui.theme.SyokAmberAccent
@@ -48,18 +58,24 @@ import io.github.amirinns.syok.ui.theme.SyokTextHigh
 import io.github.amirinns.syok.ui.theme.SyokTextLow
 import io.github.amirinns.syok.ui.theme.SyokTextMed
 
+enum class LibraryTab { ALBUMS, STATIONS }
+
 @Composable
 fun LibraryScreen(
     viewModel: PlayerViewModel,
     hasPermission: Boolean,
     onGrantPermissionRequested: () -> Unit,
     onNavigateToNowPlaying: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToSources: () -> Unit = {}
 ) {
     val albums by viewModel.albumsFlow.collectAsState()
+    val stations by viewModel.stations.collectAsState()
     val trackCount by viewModel.trackCountFlow.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
     val playbackState by viewModel.playbackState.collectAsState()
+    val folderError by viewModel.folderPlaybackError.collectAsState()
+    var selectedTab by rememberSaveable { mutableStateOf(LibraryTab.ALBUMS) }
 
     Column(
         modifier = modifier
@@ -74,10 +90,13 @@ fun LibraryScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(SyokAmberAccent)
+                        .heightIn(min = 48.dp)
+                        .clickable(onClick = onNavigateToSources)
+                        .semantics { contentDescription = "Sources. Set up music folders while parked." }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "Local Files ($trackCount)",
+                        text = "Sources · $trackCount tracks",
                         color = SyokAmberContrast,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -123,24 +142,95 @@ fun LibraryScreen(
             }
         )
 
+        folderError?.let { FolderRecoveryBanner(it, onNavigateToSources) }
+
+        // Top library navigation tabs (Albums vs Stations)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (selectedTab == LibraryTab.ALBUMS) SyokAmberAccent else SyokNightSurface)
+                    .border(1.dp, if (selectedTab == LibraryTab.ALBUMS) SyokAmberAccent else SyokBorder, RoundedCornerShape(8.dp))
+                    .clickable { selectedTab = LibraryTab.ALBUMS }
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Albums (${albums.size})",
+                    color = if (selectedTab == LibraryTab.ALBUMS) SyokAmberContrast else SyokTextHigh,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (selectedTab == LibraryTab.STATIONS) SyokAmberAccent else SyokNightSurface)
+                    .border(1.dp, if (selectedTab == LibraryTab.STATIONS) SyokAmberAccent else SyokBorder, RoundedCornerShape(8.dp))
+                    .clickable { selectedTab = LibraryTab.STATIONS }
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Stations (${stations.size})",
+                    color = if (selectedTab == LibraryTab.STATIONS) SyokAmberContrast else SyokTextHigh,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
+            }
+        }
+
         // Main content area
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            when {
-                !hasPermission -> {
-                    PermissionEmptyState(onGrantRequested = onGrantPermissionRequested)
+            if (selectedTab == LibraryTab.ALBUMS) {
+                when {
+                    !hasPermission && albums.isEmpty() -> {
+                        PermissionEmptyState(onGrantRequested = onGrantPermissionRequested)
+                    }
+                    albums.isEmpty() -> {
+                        NoMusicEmptyState(
+                            isScanning = isScanning,
+                            onRescan = { viewModel.scanMedia() }
+                        )
+                    }
+                    else -> {
+                        // 4-column responsive album grid (Direction A)
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(4),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(albums, key = { it.title }) { album ->
+                                AlbumCard(
+                                    album = album,
+                                    artworkLoader = viewModel.artworkLoader,
+                                    onClick = {
+                                        viewModel.playAlbum(album)
+                                        onNavigateToNowPlaying()
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
-                albums.isEmpty() -> {
-                    NoMusicEmptyState(
-                        isScanning = isScanning,
-                        onRescan = { viewModel.scanMedia() }
-                    )
-                }
-                else -> {
-                    // 4-column responsive album grid (Direction A)
+            } else {
+                if (stations.isEmpty()) {
+                    NoStationsEmptyState(onNavigateToSources = onNavigateToSources)
+                } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(4),
                         modifier = Modifier.fillMaxSize(),
@@ -148,12 +238,11 @@ fun LibraryScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(albums, key = { it.title }) { album ->
-                            AlbumCard(
-                                album = album,
-                                artworkLoader = viewModel.artworkLoader,
+                        items(stations, key = { it.id }) { station ->
+                            StationCard(
+                                station = station,
                                 onClick = {
-                                    viewModel.playAlbum(album)
+                                    viewModel.playStation(station)
                                     onNavigateToNowPlaying()
                                 }
                             )
@@ -485,6 +574,130 @@ fun NoMusicEmptyState(
         ) {
             Text(
                 text = if (isScanning) "Scanning Media..." else "Rescan Audio",
+                color = SyokAmberContrast,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun StationCard(
+    station: StationEntity,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(SyokNightSurface)
+            .border(1.dp, SyokBorder, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(SyokNightCard)
+                .border(1.dp, SyokBorder, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_radio),
+                contentDescription = null,
+                tint = SyokAmberAccent,
+                modifier = Modifier.size(48.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = station.name,
+            color = SyokTextHigh,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Text(
+            text = "Internet Radio",
+            color = SyokTextMed,
+            fontSize = 13.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "LIVE STREAM",
+                color = SyokAmberAccent,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "RADIO",
+                color = SyokTextLow,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+fun NoStationsEmptyState(
+    onNavigateToSources: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "No Radio Stations Saved",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = SyokTextHigh
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = "Add internet radio streams in Sources while parked to listen to live broadcasts.",
+            fontSize = 15.sp,
+            color = SyokTextMed,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(0.6f)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .height(60.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(SyokAmberAccent)
+                .clickable(onClick = onNavigateToSources)
+                .padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Add Stations in Sources",
                 color = SyokAmberContrast,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold

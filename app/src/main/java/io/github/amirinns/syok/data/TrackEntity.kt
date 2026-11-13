@@ -26,5 +26,6 @@ data class TrackEntity(
     val trackNumber: Int = 0,
     val discNumber: Int = 1,
     val durationMs: Long = 0L,
-    val isAvailable: Boolean = true
+    val isAvailable: Boolean = true,
+    val sourceId: String? = null
 )

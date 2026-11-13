@@ -3,11 +3,13 @@ package io.github.amirinns.syok.playback
 import android.net.Uri
 import androidx.media3.common.MediaItem
 import io.github.amirinns.syok.data.LibraryDao
+import io.github.amirinns.syok.radio.RadioSource
 
 /**
  * Manages the media browse hierarchy for Android Auto and external MediaBrowser clients.
- * Enforces a strict, stable 4-level structure:
+ * Enforces a strict, stable structure:
  * Root ([syok_root]) -> Local (syok:local) -> Albums (syok:album:<name>) -> Tracks (mediastore:external:<id>)
+ *                    -> Stations (syok:stations) -> Station items (station:<id>)
  *
  * Implements bounded pagination, explicit browsable/playable flags, and safe off-main-thread queries.
  */
@@ -18,6 +20,7 @@ class BrowseTree(
     companion object {
         const val ROOT_ID = "[syok_root]"
         const val LOCAL_ID = "syok:local"
+        const val STATIONS_ID = "syok:stations"
         const val ALBUM_PREFIX = "syok:album:"
 
         const val DEFAULT_PAGE_SIZE = 50
@@ -49,13 +52,21 @@ class BrowseTree(
 
         return when {
             parentId == ROOT_ID || parentId == "syok:root" -> {
-                val rootChildren = listOf(MediaItemMapper.createLocalRootItem())
+                val rootChildren = listOf(
+                    MediaItemMapper.createLocalRootItem(),
+                    MediaItemMapper.createStationsRootItem()
+                )
                 paginate(rootChildren, page, pageSize)
             }
             parentId == LOCAL_ID || parentId == "syok:local:albums" || parentId == "syok:albums" -> {
                 val albums = libraryDao.getAlbumsSync()
                 val albumItems = albums.map { MediaItemMapper.mapAlbumToBrowseItem(it) }
                 paginate(albumItems, page, pageSize)
+            }
+            parentId == STATIONS_ID || parentId == "syok:stations" -> {
+                val stations = libraryDao.getStations()
+                val stationItems = stations.map { RadioSource.createStationBrowseItem(it) }
+                paginate(stationItems, page, pageSize)
             }
             parentId.startsWith(ALBUM_PREFIX) -> {
                 val albumName = parseAlbumName(parentId) ?: return emptyList()
@@ -78,6 +89,14 @@ class BrowseTree(
         }
         if (mediaId == LOCAL_ID || mediaId == "syok:local:albums") {
             return MediaItemMapper.createLocalRootItem()
+        }
+        if (mediaId == STATIONS_ID || mediaId == "syok:stations") {
+            return MediaItemMapper.createStationsRootItem()
+        }
+        if (RadioSource.isStationMediaId(mediaId)) {
+            val stationId = RadioSource.parseStationId(mediaId) ?: return null
+            val station = libraryDao.getStation(stationId) ?: return null
+            return RadioSource.createStationBrowseItem(station)
         }
         if (mediaId.startsWith(ALBUM_PREFIX)) {
             val albumName = parseAlbumName(mediaId) ?: return null

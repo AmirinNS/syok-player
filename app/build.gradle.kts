@@ -56,6 +56,7 @@ dependencies {
     ksp(libs.room.compiler)
 
     implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.session)
 
     testImplementation(libs.junit)

@@ -16,7 +16,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,6 +42,7 @@ import io.github.amirinns.syok.ui.components.CarSecondaryButton
 import io.github.amirinns.syok.ui.components.CarSkipButton
 import io.github.amirinns.syok.ui.components.SystemHeaderBar
 import io.github.amirinns.syok.ui.theme.SyokAmberAccent
+import io.github.amirinns.syok.ui.theme.SyokAmberContrast
 import io.github.amirinns.syok.ui.theme.SyokBorder
 import io.github.amirinns.syok.ui.theme.SyokBorderSubtle
 import io.github.amirinns.syok.ui.theme.SyokNightBase
@@ -52,10 +57,11 @@ fun NowPlayingScreen(
     viewModel: PlayerViewModel,
     onNavigateToLibrary: () -> Unit,
     onNavigateToQueue: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToSources: () -> Unit = {}
 ) {
     val state by viewModel.playbackState.collectAsState()
-
+    val folderError by viewModel.folderPlaybackError.collectAsState()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -90,7 +96,7 @@ fun NowPlayingScreen(
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "LOCAL SOURCE",
+                        text = if (state.isLive) "RADIO SOURCE" else "LOCAL SOURCE",
                         color = SyokAmberAccent,
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
@@ -117,6 +123,8 @@ fun NowPlayingScreen(
                 }
             }
         )
+
+        folderError?.let { FolderRecoveryBanner(it, onNavigateToSources) }
 
         // Direction A: Asymmetric Split Layout
         Row(
@@ -153,7 +161,7 @@ fun NowPlayingScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "LOCAL SOURCE",
+                        text = if (state.isLive) "RADIO SOURCE" else "LOCAL SOURCE",
                         color = Color.White,
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
@@ -171,7 +179,7 @@ fun NowPlayingScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "AUDIO",
+                        text = if (state.isLive) "LIVE" else "AUDIO",
                         color = SyokAmberAccent,
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
@@ -180,7 +188,7 @@ fun NowPlayingScreen(
                 }
             }
 
-            // Right Column (~60%): Metadata, Scrubber, Transport Deck, Up Next
+            // Right Column (~60%): Metadata, Scrubber/Live, Transport Deck, Up Next
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -208,7 +216,9 @@ fun NowPlayingScreen(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = if (state.totalTracksInQueue > 0) {
+                        text = if (state.isLive) {
+                            state.currentAlbum
+                        } else if (state.totalTracksInQueue > 0) {
                             "${state.currentAlbum} • Track ${state.currentTrackIndex + 1} of ${state.totalTracksInQueue}"
                         } else {
                             state.currentAlbum
@@ -220,12 +230,91 @@ fun NowPlayingScreen(
                     )
                 }
 
-                // Scrubber
-                CarScrubber(
-                    positionMs = state.positionMs,
-                    durationMs = state.durationMs,
-                    onSeek = { targetMs -> viewModel.seekTo(targetMs) }
-                )
+                // Stream Error Banner with Retry
+                if (state.stationError != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(SyokNightCard)
+                            .border(2.dp, SyokAmberAccent, RoundedCornerShape(10.dp))
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                            Text(
+                                text = "STREAM STATUS",
+                                color = SyokAmberAccent,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = state.stationError!!,
+                                color = SyokTextHigh,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Button(
+                            onClick = { viewModel.retryStationPlayback() },
+                            modifier = Modifier.heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SyokAmberAccent,
+                                contentColor = SyokAmberContrast
+                            )
+                        ) {
+                            Text("Retry", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                    }
+                } else if (state.isLive) {
+                    // Live Stream indicator (no scrubber)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(SyokNightCard)
+                            .border(1.dp, SyokBorder, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(CircleShape)
+                                    .background(if (state.isPlaying) SyokAmberAccent else SyokTextLow)
+                            )
+                            Text(
+                                text = if (state.isBuffering) "CONNECTING..." else "LIVE BROADCAST",
+                                color = SyokAmberAccent,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
+                        Text(
+                            text = "INTERNET RADIO",
+                            color = SyokTextMed,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                } else {
+                    // Scrubber for local tracks
+                    CarScrubber(
+                        positionMs = state.positionMs,
+                        durationMs = state.durationMs,
+                        onSeek = { targetMs -> viewModel.seekTo(targetMs) }
+                    )
+                }
 
                 // Circular Transport Deck
                 Row(
@@ -273,7 +362,7 @@ fun NowPlayingScreen(
                 }
 
                 // Up Next Banner
-                val nextTrack = state.nextTrackTitle
+                val nextTrack = if (!state.isLive) state.nextTrackTitle else null
                 if (nextTrack != null) {
                     Row(
                         modifier = Modifier

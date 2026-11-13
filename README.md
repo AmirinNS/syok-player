@@ -130,3 +130,24 @@ All test audio fixtures residing in `app/src/androidTest/assets/audio/` (`track1
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 Copyright (c) 2026 Mohamad Khairulamirin.
+
+## USB/SD folders
+
+While parked, open **Sources** in the Library header, tap **Add folder**, and choose a music folder in Android's picker. Syok persists read access so the folder can be used after restart. Available folder tracks appear alongside device music in Library and Android Auto's Local albums.
+
+On eject or revoked access, Syok retains indexed rows but hides unavailable tracks. Reconnect the drive and use **Retry indexing**, or **Reconnect / reselect** to grant access again. **Remove folder** releases access and removes its tracks from playback without deleting original files. Folder access uses Android's Storage Access Framework and never requests all-files access. Firmware without a working document provider cannot offer this folder flow.
+
+Verified on the API 34 emulator: add, play, restart without the picker, unavailable folder, retry, and remove. Physical USB eject on a real head unit is not yet tested. See [the testing record](docs/testing.md).
+
+## Internet radio
+
+While parked, open **Sources** in the Library header, scroll to **Stations**, and tap **Add station**. Syok plays direct HTTPS streams (MP3 and AAC) and HTTPS HLS (`.m3u8`) audio streams. Saved stations appear under the **Stations** tab in Library and under the Stations branch in Android Auto.
+
+Stations play as live items. Now Playing hides the scrubber and shows a LIVE label. If a station fails, the app retries 3 times with backoff, then shows an error with a **Retry** button.
+
+Not supported:
+- HTTP-only stations. Every stream must use HTTPS, and HTTPS to HTTP redirects are blocked.
+- Playlist files (`.m3u`, `.pls`). Use the direct stream URL or an HLS `.m3u8` URL.
+- Credentials in station URLs (for example `https://user:pass@host/`).
+
+See [the testing record](docs/testing.md) for verified results and known limits.

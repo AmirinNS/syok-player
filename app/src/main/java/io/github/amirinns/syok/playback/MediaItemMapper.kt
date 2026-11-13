@@ -40,6 +40,20 @@ object MediaItemMapper {
             .build()
     }
 
+    fun createStationsRootItem(): MediaItem {
+        return MediaItem.Builder()
+            .setMediaId(BrowseTree.STATIONS_ID)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle("Stations")
+                    .setIsBrowsable(true)
+                    .setIsPlayable(false)
+                    .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
+                    .build()
+            )
+            .build()
+    }
+
     fun mapAlbumToBrowseItem(albumName: String, trackCount: Int? = null): MediaItem {
         val metadataBuilder = MediaMetadata.Builder()
             .setTitle(albumName)

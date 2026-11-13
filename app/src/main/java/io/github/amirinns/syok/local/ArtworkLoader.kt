@@ -89,6 +89,29 @@ class ArtworkLoader(
         }
     }
 
+    suspend fun readTags(uri: Uri): AudioTags = withContext(ioDispatcher) {
+        val retriever = MediaMetadataRetriever()
+        try {
+            retriever.setDataSource(context, uri)
+            fun tag(key: Int): String? = retriever.extractMetadata(key)
+                ?.takeIf { it.isNotBlank() && it != "<unknown>" }
+            fun number(key: Int): Int? = tag(key)?.substringBefore('/')?.toIntOrNull()
+            AudioTags(
+                title = tag(MediaMetadataRetriever.METADATA_KEY_TITLE),
+                artist = tag(MediaMetadataRetriever.METADATA_KEY_ARTIST),
+                album = tag(MediaMetadataRetriever.METADATA_KEY_ALBUM),
+                trackNumber = number(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER)?.coerceAtLeast(0) ?: 0,
+                discNumber = number(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER)?.coerceAtLeast(1) ?: 1,
+                durationMs = tag(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()?.coerceAtLeast(0) ?: 0
+            )
+        } finally {
+            try {
+                retriever.release()
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     fun clearCache() {
         memoryCache.evictAll()
     }
