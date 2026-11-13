@@ -76,7 +76,8 @@ jobs:
           target: google_apis
           profile: pixel_3a
           disable-animations: true
-          # Head-unit landscape size, the same as the local verification runs.
+          # Head-unit size and density (1024x600 at 160 dpi), the same as the local verification runs.
           script: |
             adb shell wm size 1024x600
+            adb shell wm density 160
             ./gradlew :app:connectedDebugAndroidTest || { adb logcat -d -v time | grep -iE 'ExoPlayer|AudioTrack|AudioFocus|MediaCodec|PlaybackException|syok|LocalPlaybackTest' | tail -n 300; exit 1; }

@@ -208,8 +208,8 @@ class LocalPlaybackTest {
         composeTestRule.onNodeWithText("Jalan Telawi Echoes").assertIsDisplayed()
     }
 
-    // Playback state can take longer to reach the UI on slow CI emulators (x86_64, software
-    // rendering). On timeout, log the semantics tree so the failure shows what was on screen.
+    // On timeout, log the semantics tree so a CI failure shows what was on screen
+    // (for example a transport row squeezed to zero height at the wrong density).
     private fun waitForPlaybackGlyph(glyph: String) {
         try {
             composeTestRule.waitUntil(timeoutMillis = 30000L) {
