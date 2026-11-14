@@ -486,7 +486,7 @@ fun PermissionEmptyState(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Kebenaran Audio Diperlukan",
+            text = "Audio Permission Needed",
             fontSize = 24.sp,
             fontWeight = FontWeight.ExtraBold,
             color = SyokTextHigh

@@ -29,7 +29,7 @@ To provide a genuine structural and ergonomic choice for the driver, Directions 
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ DIRECTION C: "Kopitiam" (Day-First Warm Cream & Tropical Teal Stack)        │
+│ DIRECTION C: "Coffee Shop" (Day-First Warm Cream & Tropical Teal Stack)        │
 │ [Top: Soft Nav Pills] -> [Center Stack: 250px Rounded Art -> Big Title]     │
 │ [Bottom: Unified Floating Pill Control Bar (Pandan Teal & Caramel Amber)]   │
 │ • Warm cream canvas (#FAF5EE) by default (with night variant), Outfit font  │
@@ -68,7 +68,7 @@ To provide a genuine structural and ergonomic choice for the driver, Directions 
 ### Architecture & Personality
 - **Layout Concept:** Digital instrument cluster / cockpit HUD. 
   - **Top Edge:** Telemetry status chips (`[SRC: LOCAL FLAC]`, `[BITRATE: 1411k]`, `[BUFFER: 100%]`, `[TRK: 1/4]`).
-  - **Upper Center:** Large condensed uppercase track title (`Jalan Telawi Echoes`) and cyan artist banner.
+  - **Upper Center:** Large condensed uppercase track title (`Telawi Street Echoes`) and cyan artist banner.
   - **Center:** Circular / 240° Arc Progress Gauge with tick graduations (0% to 100%) wrapping a circular 140px embedded album artwork. Left pod displays `ELAPSED [01:24]`; right pod displays `REMAINING [-02:18]`.
   - **Bottom Deck:** Full-width 5-button segmented deck stretching edge-to-edge (height 86px): `[SHUFFLE] | [PREV TRACK] | [PLAY / PAUSE (Huge Center)] | [NEXT TRACK] | [REPEAT]`.
 - **Personality:** Utilitarian, precision-engineered, cockpit instrumentation, high peripheral recognition for automotive enthusiasts.
@@ -92,20 +92,20 @@ To provide a genuine structural and ergonomic choice for the driver, Directions 
 
 ---
 
-## 4. Direction C: "Kopitiam" (Day-First Warm Cream & Tropical Teal Stack)
+## 4. Direction C: "Coffee Shop" (Day-First Warm Cream & Tropical Teal Stack)
 
 ### Architecture & Personality
 - **Layout Concept:** Centered vertical stack with friendly organic curves.
-  - **Top Row:** Soft pill navigation buttons (`[ ← Koleksi Lagu ]` and `[ Senarai Main (8) ]`).
+  - **Top Row:** Soft pill navigation buttons (`[ ← Library ]` and `[ Queue (8) ]`).
   - **Center Stack:** Centered large 250×250px pebble artwork with 24px soft radius, bold friendly track title below (`Outfit`), warm teal artist, and soft pill scrubber.
   - **Bottom Dock:** Unified floating pill control bar enclosing rounded transport controls (`Shuffle`, `Prev`, 96×76px caramel `Play/Pause`, `Next`, `Repeat`).
 - **Personality:** Relaxed, warm, Malaysian hospitality ("Syok"), reducing traffic jam stress in Klang Valley crawl traffic.
-- **Default Mode:** Day-First Light Mode (`#FAF5EE` warm cream with `#0D9488` tropical teal and `#D97706` teh tarik caramel), with dark roast kopi-o night variant (`#17120F`).
-- **Library Architecture:** 3 large rounded cards per row with giant source chips (`[ 🏠 Lagu Tempatan ]`, `[ 💾 Pemacu USB ]`, `[ 📻 Radio Klasik ]`, `[ ☁️ Navidrome Awan ]`).
+- **Default Mode:** Day-First Light Mode (`#FAF5EE` warm cream with `#0D9488` tropical teal and `#D97706` pulled tea caramel), with dark roast black coffee night variant (`#17120F`).
+- **Library Architecture:** 3 large rounded cards per row with giant source chips (`[ 🏠 Local Songs ]`, `[ 💾 USB Drive ]`, `[ 📻 Classic Radio ]`, `[ ☁️ Navidrome Cloud ]`).
 
 ### Tokens (Direction C)
-- **Palette (Day - Default):** Base `#FAF5EE`, Surface `#FFFFFF`, Card `#F3ECE1`, Primary Accent `#0D9488` (Pandan Teal, 5.2:1 AA), Secondary Accent `#D97706` (Teh Tarik Amber), Text High `#2A1C15` (Roast Coffee Dark, 16.2:1 AAA), Text Med `#5E4336`.
-- **Palette (Night Variant):** Base `#17120F` (Kopi-o), Surface `#241C17`, Card `#342721`, Primary Accent `#14B8A6` (9.6:1 AAA), Secondary Accent `#F59E0B`, Text High `#FFF7ED` (16.8:1 AAA).
+- **Palette (Day - Default):** Base `#FAF5EE`, Surface `#FFFFFF`, Card `#F3ECE1`, Primary Accent `#0D9488` (Pandan Teal, 5.2:1 AA), Secondary Accent `#D97706` (Pulled Tea Amber), Text High `#2A1C15` (Roast Coffee Dark, 16.2:1 AAA), Text Med `#5E4336`.
+- **Palette (Night Variant):** Base `#17120F` (Black Coffee), Surface `#241C17`, Card `#342721`, Primary Accent `#14B8A6` (9.6:1 AAA), Secondary Accent `#F59E0B`, Text High `#FFF7ED` (16.8:1 AAA).
 - **Typography:** `Outfit` (Warm rounded geometric humanist sans-serif).
 - **Radii:** 24px smooth pebble/pill radii, 14px small.
 - **Touch Targets:** 96×76px pill primary Play/Pause, 72px pill Prev/Next, 52px+ secondary pills.
@@ -116,7 +116,7 @@ To provide a genuine structural and ergonomic choice for the driver, Directions 
 | C1 | **Day-First Warm Cream (#FAF5EE) Palette by Default** | Malaysia experiences 12 hours of tropical daylight with high ambient UV glare; warm cream with dark roast coffee text provides maximum readability through front windscreens. | Pure white #FFFFFF or dark-only theme | Must provide an optional night variant to prevent night glare. |
 | C2 | **Centered Vertical Stack with Unified Floating Pill Bar** | Symmetrical centered focal point creates a relaxed, unhurried driving atmosphere, clinically reducing driver stress during crawl-speed jam traffic. | Asymmetric split view | Pushes transport controls into a grouped pill dock rather than spread edge-to-edge. |
 | C3 | **Large Rounded 3-Card Grid with Giant Source Chips** | Oversized friendly card touch targets (>280px × 300px) make browsing albums effortless for driver or passenger. | Dense 5-column small cards | Displays 3 cards per row instead of 4. |
-| C4 | **Manglish & Localized Microcopy ("Koleksi Lagu", "Senarai Main")** | Grounded in Malaysian car culture; celebrates local music lovers who self-host their own media. | Generic corporate English text | Expats may rely more on standard universal icons. |
+| C4 | **Short, Friendly Microcopy ("Library", "Queue")** | Plain labels a driver can read at a glance, written in a relaxed tone for people who self-host their own music. | Formal or technical labels | Some drivers may rely more on standard universal icons. |
 
 ---
 
@@ -148,7 +148,7 @@ All screenshots have been generated using a real headless Chromium browser at ex
   - Now Playing (Night): `direction-b-now-playing-1024x600.png`
   - Now Playing (Day): `direction-b-now-playing-day-1024x600.png`
   - Library (Dense List): `direction-b-library-1024x600.png`
-- **Direction C (Kopitiam):**
+- **Direction C (Coffee Shop):**
   - Now Playing (Day - Default): `direction-c-now-playing-1024x600.png`
   - Now Playing (Night Variant): `direction-c-now-playing-night-1024x600.png`
   - Library (Large Cards): `direction-c-library-1024x600.png`

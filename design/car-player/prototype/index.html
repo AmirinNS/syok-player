@@ -327,7 +327,7 @@
     }
 
     /* ==========================================================================
-       THEME TOKENS: DIRECTION C (Kopitiam - Day-First Warm Cream & Teal)
+       THEME TOKENS: DIRECTION C (Coffee Shop - Day-First Warm Cream & Teal)
        ========================================================================== */
     .headunit-screen[data-direction="c"][data-theme="day"] {
       --bg-base: #faf5ee;
@@ -337,7 +337,7 @@
       --accent: #0d9488;          /* Warm Tropical Teal */
       --accent-glow: rgba(13, 148, 136, 0.3);
       --accent-contrast: #ffffff;
-      --accent-secondary: #d97706;/* Teh Tarik Amber */
+      --accent-secondary: #d97706;/* Pulled Tea Amber */
       --text-high: #2a1c15;       /* Dark roast coffee */
       --text-med: #5e4336;       /* Cocoa */
       --text-low: #8f6e5e;
@@ -351,7 +351,7 @@
       --btn-shadow: 0 4px 14px rgba(80,40,20,0.08);
     }
     .headunit-screen[data-direction="c"][data-theme="night"] {
-      --bg-base: #17120f;         /* Kopi-o deep black */
+      --bg-base: #17120f;         /* Black coffee deep black */
       --bg-surface: #241c17;
       --bg-card: #342721;
       --bg-card-hover: #46352c;
@@ -788,7 +788,7 @@
     .dock-btn.primary svg { width: 38px; height: 38px; }
 
     /* ==========================================================================
-       NOW PLAYING: DIRECTION C (Kopitiam - Centered Friendly Stack & Pill Row)
+       NOW PLAYING: DIRECTION C (Coffee Shop - Centered Friendly Stack & Pill Row)
        ========================================================================== */
     .np-layout-c {
       display: flex;
@@ -800,7 +800,7 @@
       padding: 16px 24px 20px;
       font-family: 'Outfit', sans-serif;
     }
-    .kopitiam-top-row {
+    .cafe-top-row {
       width: 100%;
       display: flex;
       align-items: center;
@@ -823,7 +823,7 @@
     }
     .pill-soft-nav svg { width: 20px; height: 20px; fill: currentColor; }
 
-    .kopitiam-center-body {
+    .cafe-center-body {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -831,7 +831,7 @@
       max-width: 600px;
       margin: auto 0;
     }
-    .kopitiam-art-card {
+    .cafe-art-card {
       width: 230px;
       height: 230px;
       border-radius: 28px;
@@ -840,36 +840,36 @@
       margin-bottom: 12px;
       background: var(--bg-card);
     }
-    .headunit-screen.size-720p .kopitiam-art-card {
+    .headunit-screen.size-720p .cafe-art-card {
       width: 290px;
       height: 290px;
     }
-    .kopitiam-art-card svg {
+    .cafe-art-card svg {
       width: 100%;
       height: 100%;
       display: block;
     }
 
-    .kopitiam-title {
+    .cafe-title {
       font-size: 28px;
       font-weight: 800;
       color: var(--text-high);
       line-height: 1.2;
     }
-    .kopitiam-artist {
+    .cafe-artist {
       font-size: 18px;
       font-weight: 600;
       color: var(--accent);
       margin-top: 3px;
     }
-    .kopitiam-sub {
+    .cafe-sub {
       font-size: 13px;
       color: var(--text-low);
       margin-top: 2px;
     }
 
     /* Scrubber C */
-    .kopitiam-scrub-row {
+    .cafe-scrub-row {
       width: 100%;
       max-width: 580px;
       margin-top: 10px;
@@ -901,7 +901,7 @@
     }
 
     /* Floating Pill Row Controls */
-    .kopitiam-ctrl-row {
+    .cafe-ctrl-row {
       display: inline-flex;
       align-items: center;
       background: var(--bg-surface);
@@ -1042,7 +1042,7 @@
       padding: 20px 24px 96px;
       overflow-y: auto;
     }
-    .kopitiam-album-card {
+    .cafe-album-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: 20px;
@@ -1051,18 +1051,18 @@
       box-shadow: var(--btn-shadow);
       transition: transform 0.15s;
     }
-    .kopitiam-album-card:hover {
+    .cafe-album-card:hover {
       transform: translateY(-2px);
       border-color: var(--accent);
     }
-    .kopitiam-album-art {
+    .cafe-album-art {
       width: 100%;
       aspect-ratio: 1/1;
       border-radius: 14px;
       overflow: hidden;
       margin-bottom: 12px;
     }
-    .kopitiam-album-art svg { width: 100%; height: 100%; }
+    .cafe-album-art svg { width: 100%; height: 100%; }
 
     /* Persistent Bottom Mini-Player */
     .bottom-mini-bar {
@@ -1316,7 +1316,7 @@
           <span>B: Dashboard (Cluster)</span>
         </button>
         <button class="pill-btn pill-c" onclick="setDirection('c')">
-          <span>C: Kopitiam (Day-First)</span>
+          <span>C: Coffee Shop (Day-First)</span>
         </button>
       </div>
 
@@ -1432,7 +1432,7 @@
             <div style="width:96px; height:96px; border-radius:50%; background:var(--bg-surface); border:2px dashed var(--accent); display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
               <svg viewBox="0 0 24 24" width="48" height="48" fill="var(--accent)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2v-2zm0-10h2v8h-2V7z"/></svg>
             </div>
-            <h2 style="font-size:26px; font-weight:800; margin-bottom:10px;">Kebenaran Audio Diperlukan</h2>
+            <h2 style="font-size:26px; font-weight:800; margin-bottom:10px;">Audio Permission Needed</h2>
             <p style="font-size:15px; color:var(--text-med); max-width:540px; line-height:1.5; margin-bottom:24px;">
               Syok needs permission to scan audio files on this Android head unit and any plugged-in USB/SD drives.
               Your private music remains local and is never uploaded.
@@ -1531,7 +1531,7 @@
     const ALBUMS = [
       {
         id: "alb-1",
-        title: "Malam di Bangsar",
+        title: "Night in Bangsar",
         artist: "The Monsoons",
         source: "local",
         tracksCount: 12,
@@ -1540,15 +1540,15 @@
         artGradient: ["#0f172a", "#1e1b4b", "#4338ca", "#ff9f0a"],
         artTheme: "city-neon",
         tracks: [
-          { title: "Jalan Telawi Echoes", duration: 204 },
-          { title: "Midnight Roti Canai", duration: 188 },
+          { title: "Telawi Street Echoes", duration: 204 },
+          { title: "Midnight Flatbread", duration: 188 },
           { title: "Flyover Sprint (Sprint HW)", duration: 242 },
-          { title: "Kedai Kopi Nostalgia", duration: 195 }
+          { title: "Coffee Shop Nostalgia", duration: 195 }
         ]
       },
       {
         id: "alb-9",
-        title: "Jalan Alor Midnight",
+        title: "Alor Street Midnight",
         artist: "KL Jazz Collective",
         source: "local",
         tracksCount: 8,
@@ -1557,31 +1557,31 @@
         artGradient: ["#1e1b4b", "#312e81", "#4f46e5", "#818cf8"],
         artTheme: "abstract",
         tracks: [
-          { title: "Saxophone di Petaling", duration: 218 },
+          { title: "Saxophone in Petaling", duration: 218 },
           { title: "Neon Wok Stride", duration: 194 }
         ]
       },
       {
         id: "alb-2",
-        title: "Kopi O Peng",
-        artist: "Kugiran Senja",
+        title: "Iced Black Coffee",
+        artist: "The Dusk Band",
         source: "usb",
         tracksCount: 9,
         format: "MP3 320kbps",
         year: 2023,
         artGradient: ["#1c130d", "#382315", "#78350f", "#f59e0b"],
-        artTheme: "kopitiam-glass",
+        artTheme: "cafe-glass",
         tracks: [
-          { title: "Gula Melaka Groove", duration: 255 },
-          { title: "Pagi Ahad Tenang", duration: 210 },
-          { title: "Pasar Seni Sunset", duration: 228 },
-          { title: "Teh Tarik Kurang Manis", duration: 190 }
+          { title: "Palm Sugar Groove", duration: 255 },
+          { title: "Quiet Sunday Morning", duration: 210 },
+          { title: "Central Market Sunset", duration: 228 },
+          { title: "Pulled Tea, Less Sugar", duration: 190 }
         ]
       },
       {
         id: "alb-3",
-        title: "Balik Kampung Beats",
-        artist: "DJ Rimba",
+        title: "Hometown Drive Beats",
+        artist: "DJ Forest",
         source: "navidrome",
         tracksCount: 14,
         format: "Opus 256kbps",
@@ -1591,13 +1591,13 @@
         tracks: [
           { title: "Highway PLUS Jam (Senai)", duration: 208 },
           { title: "R&R Tapah Midnight Run", duration: 264 },
-          { title: "Hutan Lipur Bassline", duration: 198 },
+          { title: "Forest Park Bassline", duration: 198 },
           { title: "Toll Booth Synthwave", duration: 176 }
         ]
       },
       {
         id: "alb-4",
-        title: "Hujan Petang",
+        title: "Afternoon Rain",
         artist: "Siti & The Skylines",
         source: "local",
         tracksCount: 10,
@@ -1606,31 +1606,31 @@
         artGradient: ["#082f49", "#0c4a6e", "#0284c7", "#38bdf8"],
         artTheme: "rain-windshield",
         tracks: [
-          { title: "Gerimis di Federal Highway", duration: 290 },
-          { title: "Lampu Merah Damansara", duration: 215 },
+          { title: "Drizzle on Federal Highway", duration: 290 },
+          { title: "Damansara Red Light", duration: 215 },
           { title: "Wiper Rhythmic Blues", duration: 230 }
         ]
       },
       {
         id: "alb-5",
-        title: "Pantai Timur Groove",
-        artist: "Gendang Kota",
+        title: "East Coast Groove",
+        artist: "City Drums",
         source: "usb",
         tracksCount: 8,
         format: "WAV 24-bit/48kHz",
         year: 2023,
         artGradient: ["#022c22", "#064e3b", "#059669", "#34d399"],
-        artTheme: "wau-geometry",
+        artTheme: "kite-geometry",
         tracks: [
-          { title: "Rebana Cyberpunk", duration: 235 },
-          { title: "Angin Laut Cherating", duration: 250 },
-          { title: "Ombak Tujuh", duration: 212 }
+          { title: "Frame Drum Cyberpunk", duration: 235 },
+          { title: "Cherating Sea Breeze", duration: 250 },
+          { title: "Seventh Wave", duration: 212 }
         ]
       },
       {
         id: "alb-6",
-        title: "Lembah Klang Lo-Fi",
-        artist: "Acapella Desa",
+        title: "Klang Valley Lo-Fi",
+        artist: "Village Acapella",
         source: "navidrome",
         tracksCount: 11,
         format: "FLAC 24-bit/48kHz",
@@ -1645,8 +1645,8 @@
       },
       {
         id: "alb-7",
-        title: "Gitar Desa Klasik",
-        artist: "Pak Din Trio",
+        title: "Classic Village Guitar",
+        artist: "Uncle Din Trio",
         source: "local",
         tracksCount: 10,
         format: "MP3 320kbps",
@@ -1654,18 +1654,18 @@
         artGradient: ["#291807", "#45240c", "#854d0e", "#eab308"],
         artTheme: "acoustic-wood",
         tracks: [
-          { title: "Seruling Senja", duration: 304 },
-          { title: "Lagu Buat Peminat", duration: 240 }
+          { title: "Dusk Flute", duration: 304 },
+          { title: "A Song for the Fans", duration: 240 }
         ]
       }
     ];
 
     /* Radio Stations */
     const RADIO_STATIONS = [
-      { name: "Radio Klasik Kita", freq: "98.8", unit: "FM", genre: "Evergreen & Acoustic", status: "LIVE 320k" },
-      { name: "Bayu Chillwave", freq: "ONLINE", unit: "AAC", genre: "Lo-Fi Instrumental Beats", status: "ONLINE" },
+      { name: "Our Classic Radio", freq: "98.8", unit: "FM", genre: "Evergreen & Acoustic", status: "LIVE 320k" },
+      { name: "Breeze Chillwave", freq: "ONLINE", unit: "AAC", genre: "Lo-Fi Instrumental Beats", status: "ONLINE" },
       { name: "Rhythm Malaya", freq: "101.5", unit: "FM", genre: "City Pop, Funk & Jazz", status: "LIVE 256k" },
-      { name: "Suara Rimba FM", freq: "92.3", unit: "FM", genre: "Nusantara Ambient Folk", status: "LIVE 192k" }
+      { name: "Jungle Voice FM", freq: "92.3", unit: "FM", genre: "Southeast Asian Ambient Folk", status: "LIVE 192k" }
     ];
 
     /* Application Reactive State */
@@ -1697,10 +1697,10 @@
           <circle cx="${size * 0.75}" cy="${size * 0.3}" r="${size * 0.18}" fill="${g[3]}" opacity="0.8" filter="blur(16px)"/>
           <path d="M0,${size*0.75} L${size*0.25},${size*0.55} L${size*0.4},${size*0.65} L${size*0.65},${size*0.45} L${size*0.85},${size*0.6} L${size},${size*0.5} L${size},${size} L0,${size} Z" fill="#050811" opacity="0.95"/>
           <line x1="0" y1="${size*0.82}" x2="${size}" y2="${size*0.82}" stroke="${g[3]}" stroke-width="3" opacity="0.7"/>
-          <text x="${size*0.08}" y="${size*0.25}" font-family="sans-serif" font-weight="800" font-size="${size*0.07}" fill="#ffffff" letter-spacing="2">MALAM DI BANGSAR</text>
+          <text x="${size*0.08}" y="${size*0.25}" font-family="sans-serif" font-weight="800" font-size="${size*0.07}" fill="#ffffff" letter-spacing="2">NIGHT IN BANGSAR</text>
           <text x="${size*0.08}" y="${size*0.33}" font-family="sans-serif" font-weight="600" font-size="${size*0.045}" fill="${g[3]}">THE MONSOONS</text>
         `;
-      } else if (album.artTheme === 'kopitiam-glass') {
+      } else if (album.artTheme === 'cafe-glass') {
         visualContent = `
           <rect x="0" y="0" width="${size}" height="${size}" fill="url(#grad-${album.id})"/>
           <circle cx="${size*0.5}" cy="${size*0.5}" r="${size*0.35}" fill="rgba(0,0,0,0.3)"/>
@@ -1708,8 +1708,8 @@
           <rect x="${size*0.3}" y="${size*0.58}" width="${size*0.4}" height="${size*0.14}" rx="${size*0.02}" fill="#fffbeb" opacity="0.85"/>
           <rect x="${size*0.36}" y="${size*0.35}" width="${size*0.11}" height="${size*0.11}" fill="rgba(255,255,255,0.4)" rx="4"/>
           <rect x="${size*0.52}" y="${size*0.38}" width="${size*0.12}" height="${size*0.12}" fill="rgba(255,255,255,0.4)" rx="4"/>
-          <text x="${size*0.5}" y="${size*0.84}" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="${size*0.065}" fill="#fff7ed">KOPI O PENG</text>
-          <text x="${size*0.5}" y="${size*0.91}" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="${size*0.045}" fill="#f59e0b">KUGIRAN SENJA</text>
+          <text x="${size*0.5}" y="${size*0.84}" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="${size*0.065}" fill="#fff7ed">ICED BLACK COFFEE</text>
+          <text x="${size*0.5}" y="${size*0.91}" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="${size*0.045}" fill="#f59e0b">THE DUSK BAND</text>
         `;
       } else if (album.artTheme === 'dusk-highway') {
         visualContent = `
@@ -1717,7 +1717,7 @@
           <circle cx="${size*0.5}" cy="${size*0.45}" r="${size*0.25}" fill="#fb7185" opacity="0.9"/>
           <polygon points="${size*0.46},${size*0.6} ${size*0.54},${size*0.6} ${size*0.9},${size} ${size*0.1},${size}" fill="#0f172a"/>
           <line x1="${size*0.5}" y1="${size*0.62}" x2="${size*0.5}" y2="${size*0.98}" stroke="#facc15" stroke-width="4" stroke-dasharray="10 8"/>
-          <text x="${size*0.08}" y="${size*0.2}" font-family="sans-serif" font-weight="800" font-size="${size*0.06}" fill="#ffffff">BALIK KAMPUNG BEATS</text>
+          <text x="${size*0.08}" y="${size*0.2}" font-family="sans-serif" font-weight="800" font-size="${size*0.06}" fill="#ffffff">HOMETOWN DRIVE BEATS</text>
         `;
       } else {
         visualContent = `
@@ -1911,35 +1911,35 @@
           </div>
         `;
       } else if (state.direction === 'c') {
-        /* DIRECTION C: KOPITIAM (Day-first light, centered stacked pebble art, pill controls) */
+        /* DIRECTION C: COFFEE SHOP (Day-first light, centered stacked pebble art, pill controls) */
         container.innerHTML = `
           <div class="np-layout-c">
             <!-- Top Soft Pill Navigation -->
-            <div class="kopitiam-top-row">
+            <div class="cafe-top-row">
               <button class="pill-soft-nav" onclick="setScreen('library')">
                 <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                <span>Koleksi Lagu &bull; Library</span>
+                <span>Library</span>
               </button>
               <div style="font-size:13px; font-weight:700; color:var(--text-med); background:var(--bg-surface); padding:8px 16px; border-radius:20px; border:1px solid var(--border);">
                 ${currentAlb.source.toUpperCase()} &bull; ${currentAlb.format}
               </div>
               <button class="pill-soft-nav" onclick="setScreen('queue')">
                 <svg viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></svg>
-                <span>Senarai (${ALBUMS.length * 3})</span>
+                <span>Queue (${ALBUMS.length * 3})</span>
               </button>
             </div>
 
             <!-- Centered Stack Body -->
-            <div class="kopitiam-center-body">
-              <div class="kopitiam-art-card">
+            <div class="cafe-center-body">
+              <div class="cafe-art-card">
                 ${renderSvgArtwork(currentAlb, 300)}
               </div>
-              <div class="kopitiam-title">${currentTrk.title}</div>
-              <div class="kopitiam-artist">${currentAlb.artist}</div>
-              <div class="kopitiam-sub">${currentAlb.title} &bull; Lagu 0${state.currentTrackIndex + 1}</div>
+              <div class="cafe-title">${currentTrk.title}</div>
+              <div class="cafe-artist">${currentAlb.artist}</div>
+              <div class="cafe-sub">${currentAlb.title} &bull; Track 0${state.currentTrackIndex + 1}</div>
 
               <!-- Pill Scrubber -->
-              <div class="kopitiam-scrub-row">
+              <div class="cafe-scrub-row">
                 <div class="pill-rail" onclick="handleSeek(event)">
                   <div class="pill-fill" style="width:${pct}%;"></div>
                 </div>
@@ -1951,7 +1951,7 @@
             </div>
 
             <!-- Floating Pill Control Bar -->
-            <div class="kopitiam-ctrl-row">
+            <div class="cafe-ctrl-row">
               <button class="pill-btn-c sub" onclick="toggleShuffle()"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
               <button class="pill-btn-c skip" onclick="prevTrack()"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
               <button class="pill-btn-c play" onclick="togglePlay()">${playIcon}</button>
@@ -2077,22 +2077,22 @@
           <div class="lib-layout" style="font-family:'Outfit', sans-serif;">
             <div class="lib-c-header">
               <div style="display:flex; gap:12px; overflow-x:auto;">
-                <button class="pill-soft-nav" style="${state.sourceFilter==='local'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('local')">🏠 Lagu Tempatan (84)</button>
-                <button class="pill-soft-nav" style="${state.sourceFilter==='usb'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('usb')">💾 Pemacu USB (120)</button>
-                <button class="pill-soft-nav" style="${state.sourceFilter==='radio'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('radio')">📻 Radio Klasik (8)</button>
-                <button class="pill-soft-nav" style="${state.sourceFilter==='navidrome'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('navidrome')">☁️ Navidrome Awan</button>
+                <button class="pill-soft-nav" style="${state.sourceFilter==='local'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('local')">🏠 Local Songs (84)</button>
+                <button class="pill-soft-nav" style="${state.sourceFilter==='usb'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('usb')">💾 USB Drive (120)</button>
+                <button class="pill-soft-nav" style="${state.sourceFilter==='radio'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('radio')">📻 Classic Radio (8)</button>
+                <button class="pill-soft-nav" style="${state.sourceFilter==='navidrome'?'background:var(--accent); color:#fff;':''}" onclick="setLibSource('navidrome')">☁️ Navidrome Cloud</button>
               </div>
-              <button class="pill-soft-nav" onclick="setScreen('now-playing')">Sedang Dimainkan &rarr;</button>
+              <button class="pill-soft-nav" onclick="setScreen('now-playing')">Now Playing &rarr;</button>
             </div>
 
             <div class="lib-c-grid">
               ${filtered.map(a => `
-                <div class="kopitiam-album-card" onclick="playSelectedAlbum('${a.id}')">
-                  <div class="kopitiam-album-art">${renderSvgArtwork(a, 260)}</div>
+                <div class="cafe-album-card" onclick="playSelectedAlbum('${a.id}')">
+                  <div class="cafe-album-art">${renderSvgArtwork(a, 260)}</div>
                   <div style="font-size:18px; font-weight:800; color:var(--text-high);">${a.title}</div>
                   <div style="font-size:15px; font-weight:600; color:var(--accent); margin-top:2px;">${a.artist}</div>
                   <div style="font-size:13px; color:var(--text-low); margin-top:6px; display:flex; justify-content:space-between;">
-                    <span>${a.tracksCount} buah lagu</span>
+                    <span>${a.tracksCount} tracks</span>
                     <span>${a.format.split(' ')[0]}</span>
                   </div>
                 </div>
@@ -2283,7 +2283,7 @@
       const screen = document.getElementById('headunit-screen');
       screen.setAttribute('data-direction', dir);
 
-      // Kopitiam defaults to Day-first unless user manually set night!
+      // Coffee Shop defaults to Day-first unless user manually set night!
       if (dir === 'c' && !window._manualThemeSet) {
         setTheme('day', true);
       } else if (dir !== 'c' && !window._manualThemeSet) {
@@ -2402,7 +2402,7 @@
       const dirNames = {
         'a': 'Direction A: Night Drive (Split Asymmetric Layout)',
         'b': 'Direction B: Dashboard (Instrument Cluster Cockpit Layout)',
-        'c': 'Direction C: Kopitiam (Day-First Centered Stack & Pill Row)'
+        'c': 'Direction C: Coffee Shop (Day-First Centered Stack & Pill Row)'
       };
       title.textContent = `Design Decisions (${d.toUpperCase()})`;
 
@@ -2495,7 +2495,7 @@
       const dirNames = {
         'a': 'Direction A: Night Drive (Amber Glow & Deep Minimal)',
         'b': 'Direction B: Dashboard (Cockpit Instrument Cluster Cyan)',
-        'c': 'Direction C: Kopitiam (Day-First Warm Cream & Teal)'
+        'c': 'Direction C: Coffee Shop (Day-First Warm Cream & Teal)'
       };
       document.getElementById('tokens-drawer-title').textContent = dirNames[d];
 

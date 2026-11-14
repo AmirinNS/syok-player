@@ -82,7 +82,7 @@ Set up while parked. Use the existing Pixel_3a API 34 AVD. Once the SDK tools an
 4. Return to Library and play Folder fixtures. Run `adb shell am force-stop io.github.amirinns.syok`, relaunch with `adb shell am start -n io.github.amirinns.syok/.MainActivity`, then play the album again. No picker should be required.
 5. In Sources, **Remove folder** and confirm. Its SAF tracks should disappear from Library/Local browse and the active queue, while original documents remain. The screen should explain that Add folder reconnects. MediaStore may independently index the same device file, so distinguish the `saf:` identity when inspecting rows.
 6. Add again, revoke the system grant independently if the device offers that action, and return to Sources. It should show **Access revoked** and a reconnect action. Exercise physical USB eject during playback on hardware; the emulator's primary storage is not a removable-volume substitute. Unavailable rows must remain in Room with `isAvailable = 0`.
-7. Reconnect/reselect and retry. A malformed audio file must not prevent a good sibling file from indexing. Check phone portrait setup, large text, focus navigation, and TalkBack labels. Reset `adb shell wm size reset` and `adb shell wm density reset`, then shut down the AVD with `adb emu kill`.
+7. Reconnect/reselect and retry. A malformed audio file must not prevent a good sibling file from indexing. Check that a phone held upright still shows Syok in landscape, then check large text, focus navigation, and TalkBack labels. Reset `adb shell wm size reset` and `adb shell wm density reset`, then shut down the AVD with `adb emu kill`.
 
 ### Verification record, 2026-11-12 (Pixel_3a API 34 AVD, 1024x600)
 
@@ -96,7 +96,8 @@ Set up while parked. Use the existing Pixel_3a API 34 AVD. Once the SDK tools an
 | Folder restored, Retry indexing | Pass. Available again, 2 tracks. |
 | Remove folder (with confirmation) | Pass. Tracks leave Library; original files remain on storage. |
 | Grant revoked by the system, physical USB eject during playback | Not run. Covered by SafSourceTest only; needs a real head unit or a device with a removable volume. |
-| TalkBack, large text, phone portrait | Not run. |
+| TalkBack, large text | Not run. |
+| Phone held upright | Passed on API 34 at 1080x2220. `MainActivity` uses `sensorLandscape`, so the app stays landscape. Android 16 ignores fixed orientation on screens 600 dp or wider, which only affects tablets and head units that are already landscape. |
 
 SAF scanning uses document URIs, 64-track write batches, cancellation checks, and the same metadata and artwork path as local playback. Library and the Local browse branch use the existing available-only queries. Android's persisted grants remain the access authority. Availability refreshes on app start, when Sources opens, and on storage mount, eject, and removal broadcasts. On mount, folders whose root is reachable again are rescanned automatically. MediaStore may also index the same device file, so a file in a primary-storage folder can appear twice; removable USB/SD volumes are the intended use.
 
